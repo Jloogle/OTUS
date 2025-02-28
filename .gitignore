@@ -401,3 +401,6 @@ FodyWeavers.xsd
 
 # Rider
 .idea/
+
+#exclude local settings
+appsettings.Development.json
