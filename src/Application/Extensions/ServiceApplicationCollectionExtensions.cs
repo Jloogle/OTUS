@@ -8,7 +8,6 @@ using Domain.Commands.Help;
 using Domain.Commands.Profile;
 using Domain.Commands.Start;
 using Microsoft.Extensions.DependencyInjection;
-using NetCore.AutoRegisterDi;
 
 namespace Application.Extensions;
 
@@ -16,8 +15,6 @@ public static class ServiceApplicationCollectionExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services)
     {
-        //services.AddTransient<ICommandRouting, CommandRouter>();
-        
         services.AddTransient<ICommandHandler<StartCommand>, StartCommandHandler>();
         services.AddTransient<ICommandHandler<HelpCommand>, HelpCommandHandler>();
         services.AddTransient<ICommandHandler<ProfileCommand>, ProfileCommandHandler>();
