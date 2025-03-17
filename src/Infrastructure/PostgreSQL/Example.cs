@@ -1,4 +1,4 @@
-using Application.Dto;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.PostgreSQL;
@@ -67,7 +67,7 @@ public class Example
         }
     }
 
-    public static void Print()
+    public void Print()
     {
         Add();
         using (ApplicationContext db = new ApplicationContext())

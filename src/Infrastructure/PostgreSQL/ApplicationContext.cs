@@ -1,4 +1,4 @@
-using Application.Dto;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.PostgreSQL;

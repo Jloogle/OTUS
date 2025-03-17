@@ -1,4 +1,4 @@
-namespace Application.Dto;
+namespace Domain.Entities;
 
 public class ProjTask
 {
