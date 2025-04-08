@@ -41,3 +41,39 @@
 - Отчёты и аналитика. Статистика пользователей
 - Массовая рассылка уведомлений.
 - CI/CD, github, docker.
+
+# PostgreSQL в Docker
+
+## Запуск базы данных
+
+Для запуска PostgreSQL используйте команду:
+
+```bash
+docker-compose up -d
+```
+
+## Конфигурация
+
+- **Хост**: localhost
+- **Порт**: 5432
+- **Пользователь**: postgres
+- **Пароль**: postgres
+- **База данных**: mydb
+
+## Подключение к базе
+
+```bash
+docker exec -it postgres_db psql -U postgres -d mydb
+```
+
+## Остановка базы данных
+
+```bash
+docker-compose down
+```
+
+Для удаления данных:
+
+```bash
+docker-compose down -v
+```
