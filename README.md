@@ -65,6 +65,12 @@ docker-compose up -d
 ```bash
 docker exec -it postgres_db psql -U postgres -d mydb
 ```
+```appsettings.Development.json
+,
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=postgres_db;Username=postgres_user;Password=postgres_password"
+  }
+```
 
 ## Остановка базы данных
 
