@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.PostgreSQL;
 
@@ -18,6 +19,13 @@ public sealed class ApplicationContext  : DbContext
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=postgres");
+        
+        var config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}.json", optional: true)
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .Build();
+        
+        optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
     }
 }
