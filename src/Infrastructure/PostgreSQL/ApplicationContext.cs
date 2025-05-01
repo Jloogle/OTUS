@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Infrastructure.PostgreSQL.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -15,7 +16,7 @@ public sealed class ApplicationContext  : DbContext
     public ApplicationContext()
     {
         //Database.EnsureDeleted();
-        Database.EnsureCreated();
+        // Database.EnsureCreated();
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -27,5 +28,18 @@ public sealed class ApplicationContext  : DbContext
             .Build();
         
         optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasDefaultSchema("OTUS");
+        
+        // Применяем все конфигурации
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new RoleConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjectConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjTaskConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
     }
 }
