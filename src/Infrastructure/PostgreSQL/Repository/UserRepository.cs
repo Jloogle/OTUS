@@ -1,19 +1,11 @@
 using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Infrastructure.PostgreSQL.Repository
 {
-    public class UserRepository : BaseRepository<User>, IUserRepository
+    public class UserRepository(IAdapterApplicationContext context) : BaseRepository<User>(context), IUserRepository
     {
-        public UserRepository(ApplicationContext context) : base(context)
-        {
-        }
-
         public async Task<User> FindByNameAsync(string name)
         {
             if (string.IsNullOrEmpty(name))

@@ -1,9 +1,10 @@
 using Domain.Commands;
 using Domain.Commands.Start;
+using Domain.Repositories;
 
 namespace Application.CommandHandlers.Start;
 
-public class StartCommandHandler : ICommandHandler<StartCommand>
+public class StartCommandHandler(IUserRepository userRepository) : ICommandHandler<StartCommand>
 {
     public async Task<string> Handle(StartCommand command)
     {

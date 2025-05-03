@@ -1,11 +1,8 @@
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
+
 
 namespace Infrastructure.PostgreSQL.Repository
 {
@@ -18,10 +15,10 @@ namespace Infrastructure.PostgreSQL.Repository
         protected readonly DbSet<T> _dbSet;
         protected readonly ILogger<BaseRepository<T>> _logger;
 
-        protected BaseRepository(ApplicationContext context, ILogger<BaseRepository<T>> logger = null)
+        protected BaseRepository(IAdapterApplicationContext context, ILogger<BaseRepository<T>> logger = null)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _dbSet = context.Set<T>();
+            _context = context.getContext() ?? throw new ArgumentNullException(nameof(context));
+            _dbSet = context.getContext().Set<T>();
             _logger = logger;
         }
 

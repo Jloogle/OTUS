@@ -10,7 +10,7 @@ namespace Infrastructure.PostgreSQL.Repository;
 
 public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 {
-    public ProjectRepository(ApplicationContext context) : base(context)
+    public ProjectRepository(IAdapterApplicationContext context) : base(context)
     {
     }
 

@@ -1,6 +1,6 @@
 using Domain.Commands;
 
-namespace Application.CommandRouting;
+namespace Infrastructure.Telegram;
 
 public interface ICommandRouting
 {

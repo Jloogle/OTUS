@@ -1,4 +1,3 @@
-using Application.CommandRouting;
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;

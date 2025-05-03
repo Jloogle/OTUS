@@ -10,7 +10,7 @@ namespace Infrastructure.PostgreSQL.Repository;
 
 public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
 {
-    public TaskRepository(ApplicationContext context) : base(context)
+    public TaskRepository(IAdapterApplicationContext context) : base(context)
     {
     }
 

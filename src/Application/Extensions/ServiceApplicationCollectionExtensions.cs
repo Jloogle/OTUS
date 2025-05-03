@@ -2,11 +2,14 @@ using System.Reflection;
 using Application.CommandHandlers.Help;
 using Application.CommandHandlers.Profile;
 using Application.CommandHandlers.Start;
-using Application.CommandRouting;
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;
 using Domain.Commands.Start;
+using Domain.Repositories;
+using Infrastructure.PostgreSQL;
+using Infrastructure.PostgreSQL.Repository;
+using Infrastructure.Telegram;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Extensions;
@@ -15,6 +18,8 @@ public static class ServiceApplicationCollectionExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services)
     {
+        services.AddTransient<IUserRepository, UserRepository>();
+        services.AddTransient<IAdapterApplicationContext, AdapterApplicationContext>();
         services.AddTransient<ICommandHandler<StartCommand>, StartCommandHandler>();
         services.AddTransient<ICommandHandler<HelpCommand>, HelpCommandHandler>();
         services.AddTransient<ICommandHandler<ProfileCommand>, ProfileCommandHandler>();

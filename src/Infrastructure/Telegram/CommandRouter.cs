@@ -4,7 +4,7 @@ using Domain.Commands.Profile;
 using Domain.Commands.Start;
 using Domain.Constants;
 
-namespace Application.CommandRouting;
+namespace Infrastructure.Telegram;
 
 public class CommandRouter : ICommandRouting
 {
