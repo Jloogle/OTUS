@@ -8,14 +8,15 @@ namespace Infrastructure.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             // Регистрация контекста базы данных
-            services.AddDbContext<ApplicationContext>(options =>
-                options.UseNpgsql(connectionString));
+            //services.AddDbContext<ApplicationContext>(options =>
+            //    options.UseNpgsql(connectionString));
 
             // Регистрация репозиториев
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IAdapterApplicationContext, AdapterApplicationContext>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
 

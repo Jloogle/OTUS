@@ -18,8 +18,7 @@ public static class ServiceApplicationCollectionExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services)
     {
-        services.AddTransient<IUserRepository, UserRepository>();
-        services.AddTransient<IAdapterApplicationContext, AdapterApplicationContext>();
+        
         services.AddTransient<ICommandHandler<StartCommand>, StartCommandHandler>();
         services.AddTransient<ICommandHandler<HelpCommand>, HelpCommandHandler>();
         services.AddTransient<ICommandHandler<ProfileCommand>, ProfileCommandHandler>();

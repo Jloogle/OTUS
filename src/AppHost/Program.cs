@@ -9,6 +9,7 @@ builder.Configuration
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<TelegramBotHostedService>();
 
 var host = builder.Build();
