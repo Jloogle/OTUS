@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;
@@ -17,6 +18,7 @@ public class TelegramBotHostedService : BackgroundService
     private readonly ITelegramSettings _telegramSettings;
     private readonly ITelegramBotClient _botClient;
     private readonly ICommandRouting _commandRouter;
+    private static readonly ConcurrentDictionary<int, ICommand> Lastcommands = new();
     
     public TelegramBotHostedService(
         ITelegramSettings telegramSettings,
@@ -44,10 +46,11 @@ public class TelegramBotHostedService : BackgroundService
     {
         if (update.Message is { Text: not null } message)
         {
-            var command = ParseCommand(update);
+            var command = ParseCommand(update) ?? Lastcommands.First(x=>x.Key == (int)update.Message.Chat.Id).Value;
 
             if (command != null)
             {
+                Lastcommands.AddOrUpdate((int)update.Message.Chat.Id, command, (k, v) => command);
                 var messageForUser = await _commandRouter.RouteAsync(command);
                 if (messageForUser != null)
                 {
