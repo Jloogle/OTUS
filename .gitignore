@@ -12,8 +12,6 @@
 
 #in our .gitignore file 
 .env
-#within our .env file
-REACT_APP_api_key= ".env" 
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
