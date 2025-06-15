@@ -32,7 +32,7 @@ public static class BotCommands
         return allCommands.Count != 0 && allCommands.Contains(command);
     }
     
-    public static string PrintHelpMenu()
+    public static string? PrintHelpMenu()
     {
         var r = "Help information: ";
         

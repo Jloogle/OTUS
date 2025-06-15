@@ -104,5 +104,11 @@ namespace Infrastructure.PostgreSQL.Repository
                 throw;
             }
         }
+
+        public async Task AddUser(User user)
+        {
+            _context.Users.AddRange(user);
+            await _context.SaveChangesAsync();
+        }
     }
 } 

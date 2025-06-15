@@ -1,7 +1,7 @@
 using Domain.Repositories;
 using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repository;
-using Microsoft.EntityFrameworkCore;
+using Infrastructure.Redis.Repository;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Extensions
@@ -19,6 +19,9 @@ namespace Infrastructure.Extensions
             services.AddTransient<IAdapterApplicationContext, AdapterApplicationContext>();
             services.AddScoped<IProjectRepository, ProjectRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddTransient<IAdapterMultiplexer, AdapterMultiplexer>();
+            services.AddTransient<IRadisRepository, RadisRepositoty>();
+
 
             return services;
         }

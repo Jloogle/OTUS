@@ -7,7 +7,7 @@ namespace Application.CommandHandlers.Help;
 
 public class HelpCommandHandler : ICommandHandler<HelpCommand>
 {
-    public async Task<string> Handle(HelpCommand command)
+    public async Task<string?> Handle(HelpCommand command)
     {
         
         return await Task.FromResult(BotCommands.PrintHelpMenu());

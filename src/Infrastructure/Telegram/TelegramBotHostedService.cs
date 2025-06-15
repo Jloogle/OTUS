@@ -45,8 +45,8 @@ public class TelegramBotHostedService : BackgroundService
     private async Task HandleUpdateAsync(ITelegramBotClient botClient,TelegramTypes.Update update, CancellationToken cancellationToken)
     {
         if (update.Message is { Text: not null } message)
-        {
-            var command = ParseCommand(update) ?? Lastcommands.First(x=>x.Key == (int)update.Message.Chat.Id).Value;
+        {   
+            var command = ParseCommand(update);
 
             if (command != null)
             {
@@ -70,12 +70,20 @@ public class TelegramBotHostedService : BackgroundService
         
         var parts = update.Message.Text.Split(' ');
         var trigger = parts[0];
+        
+     
+        if (!Lastcommands.IsEmpty && trigger[0] != '/')
+        {
+             trigger = Lastcommands.FirstOrDefault(x => x.Key == (int)update.Message.Chat.Id).Value.Command.ToString();
+        }
 
+        
         return trigger switch
         {
             BotCommands.Start => new StartCommand
             {
-                UserId = update.Message.From?.Id
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
             },
             BotCommands.Help => new HelpCommand
             {

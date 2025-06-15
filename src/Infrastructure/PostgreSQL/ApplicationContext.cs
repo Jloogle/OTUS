@@ -13,26 +13,12 @@ public sealed class ApplicationContext  : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<ProjTask> Tasks { get; set; }
     public DbSet<Project> Projects { get; set; }
-   
-    public ValueTask FindAsync(params object?[]? keyValues)
-    {
-        throw new NotImplementedException();
-    }
-
-    public ValueTask FindAsync(object?[]? keyValues, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IQueryable FromExpression(Expression expression)
-    {
-        throw new NotImplementedException();
-    }
+  
 
     public ApplicationContext()
     {
         //Database.EnsureDeleted();
-        Database.EnsureCreated();
+        //Database.EnsureCreated();
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

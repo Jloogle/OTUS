@@ -8,5 +8,5 @@ public interface ICommandHandler<TCommand>
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    Task<string> Handle(TCommand command);
+    Task<string?> Handle(TCommand command);
 }

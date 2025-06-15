@@ -1,6 +1,4 @@
 using Domain.Entities;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace Domain.Repositories
 {
@@ -38,5 +36,6 @@ namespace Domain.Repositories
         /// Удалить роль у пользователя
         /// </summary>
         Task RemoveRoleFromUserAsync(int userId, int roleId);
+        Task AddUser(User user);
     }
 } 
