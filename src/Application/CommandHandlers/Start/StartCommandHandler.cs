@@ -48,6 +48,7 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
             .OnEntry(() =>
             {
                 _user.State = (int)CurrentState;
+                _user!.Name = _command!.UserCommand!;
                 _ansfer = "Добро пожаловать!\nНеобходимо пройти процедуру регистрации!\nВведите ваше имя:";
                 radisRepository.StringSet("Reg: "+_command!.UserId, JsonSerializer.Serialize(_user));
             })
