@@ -24,14 +24,7 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
             ConfigStateMachine();
         }
 
-        if (CurrentState == TrafficState.Finished)
-        {
-            _ansfer = "Вы уже зарегистрировались!";
-        }
-        else
-        {
-            Trigger(TrafficTrigger.Go);
-        }
+        Trigger(TrafficTrigger.Go);
         return await Task.FromResult(_ansfer);
     }
 
@@ -42,13 +35,16 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
         _stateMachine = new StateMachine<TrafficState, TrafficTrigger>(_user!.State == (int)TrafficState.New ? TrafficState.New : (TrafficState)_user!.State-1);
         // Define the state transitions
         _stateMachine.Configure(TrafficState.New)
+            .OnEntry(() => _stateMachine.Fire(TrafficTrigger.Go))
             .Permit(TrafficTrigger.Go, TrafficState.Name);
+
 
         _stateMachine.Configure(TrafficState.Name)
             .OnEntry(() =>
             {
                 _user.State = (int)CurrentState;
-                _user!.Name = _command!.UserCommand!;
+                if (_command!.UserCommand != _command!.Command)
+                    _user!.Name = _command!.UserCommand!;
                 _ansfer = "Добро пожаловать!\nНеобходимо пройти процедуру регистрации!\nВведите ваше имя:";
                 radisRepository.StringSet("Reg: "+_command!.UserId, JsonSerializer.Serialize(_user));
             })
@@ -57,7 +53,8 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
         _stateMachine.Configure(TrafficState.Email)
             .OnEntry(() =>
             {
-                _user!.Name = _command!.UserCommand!;
+                if (_command!.UserCommand != _command!.Command)
+                    _user!.Name = _command!.UserCommand!;
                 _user.State = (int)CurrentState;
                 radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
                 _ansfer = "Введите Email:";
@@ -68,7 +65,8 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
         _stateMachine.Configure(TrafficState.Phone)
             .OnEntry(() =>
             {
-                _user!.email = _command!.UserCommand!;
+                if (_command!.UserCommand != _command!.Command)
+                    _user!.email = _command!.UserCommand!;
                 _user.State = (int)CurrentState;
                 radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
                 _ansfer = "Введите телефон:";
@@ -79,7 +77,10 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
         _stateMachine.Configure(TrafficState.Age)
             .OnEntry(() =>
             {
-                _user!.PhoneNumber = _command!.UserCommand!;
+
+                if (_command!.UserCommand != _command!.Command)
+                    _user!.PhoneNumber = _command!.UserCommand!;
+                
                 _user.State = (int)CurrentState;
                 radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
                 _ansfer = "Введите ваш возраст:";
@@ -92,7 +93,9 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
             {
                 try
                 {
-                    _user.Age = int.Parse(_command!.UserCommand!);
+                    if (_command!.UserCommand != _command!.Command)
+                        _user.Age = int.Parse(_command!.UserCommand!);
+                    
                     _user.State = (int)CurrentState;
                     _ansfer = "Вы успешно зарегистрировались!";
                     radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
@@ -103,7 +106,8 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
                 {
                     throw; // TODO handle exception
                 }
-            });
+            })
+            .Permit(TrafficTrigger.Go, TrafficState.New);
         
     }
 
