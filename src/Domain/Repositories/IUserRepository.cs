@@ -36,6 +36,17 @@ namespace Domain.Repositories
         /// Удалить роль у пользователя
         /// </summary>
         Task RemoveRoleFromUserAsync(int userId, int roleId);
+        /// <summary>
+        /// Добавить пользователя
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         Task AddUser(User user);
+        /// <summary>
+        /// Найти пользователя по id телеграма
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Task<User> FindByIdTelegram(long? id);
     }
 } 

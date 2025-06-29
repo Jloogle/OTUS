@@ -22,7 +22,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.PhoneNumber)
             .HasMaxLength(20);
         
-        builder.Property(x => x.email)
+        builder.Property(x => x.Email)
             .HasMaxLength(100);
 
         builder

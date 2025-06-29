@@ -18,9 +18,9 @@ public class Example
             db.Projects.AddRange(Project1, Project2);
             
             // создаем три пользователя
-            var user1 = new User { Name = "Tom", Age = 33 , PhoneNumber = "+7 (916) 123 45 67", email = "Tom@gmail.com" };
-            var user2 = new User { Name = "Alice", Age = 26, PhoneNumber = "+7 (916) 123 45 67", email = "Alice@gmail.com"};
-            var user3 = new User { Name = "Bob", Age = 36, PhoneNumber = "+7 (916) 123 45 67", email = "Bob@gmail.com"};
+            var user1 = new User { Name = "Tom", Age = 33 , PhoneNumber = "+7 (916) 123 45 67", Email = "Tom@gmail.com" };
+            var user2 = new User { Name = "Alice", Age = 26, PhoneNumber = "+7 (916) 123 45 67", Email = "Alice@gmail.com"};
+            var user3 = new User { Name = "Bob", Age = 36, PhoneNumber = "+7 (916) 123 45 67", Email = "Bob@gmail.com"};
             // добавляем их в бд
             db.Users.AddRange(user1, user2, user3);
             

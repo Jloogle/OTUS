@@ -3,103 +3,111 @@ using Domain.Commands;
 using Domain.Commands.Start;
 using Domain.Entities;
 using Domain.Repositories;
-
 using Stateless;
 
 namespace Application.CommandHandlers.Start;
 
 public class StartCommandHandler(IUserRepository userRepository, IRadisRepository radisRepository) : ICommandHandler<StartCommand>
 {
-    private StateMachine<TrafficState, TrafficTrigger>? _stateMachine;
+    //public StateMachine<TrafficState, TrafficTrigger>? StateMachine;
     private string? _ansfer;
-    private User? _user;
     private StartCommand? _command;
     
     public async Task<string?> Handle(StartCommand? command)
     {
         _command = command;
-        
-        if (_stateMachine is null)
-        {
-            ConfigStateMachine();
-        }
 
-        Trigger(TrafficTrigger.Go);
+       var user = await userRepository.FindByIdTelegram(command!.UserId);
+        
+        if (user != null)
+            return $"Вы уже зарегистрированы!\nВаше имя: {user.Name}";
+        
+        var userRedis = GetTempUser(_command!.UserId);
+        
+        var l = new Lock();
+        lock (l)
+        {
+           var sm = ConfigStateMachine(userRedis.State);
+           Trigger(TrafficTrigger.Go, sm); 
+        }
+            
         return await Task.FromResult(_ansfer);
     }
 
-    private void ConfigStateMachine()
+    private StateMachine<TrafficState, TrafficTrigger> ConfigStateMachine(int state)
     {
-        SetRegUser();
-        
-        _stateMachine = new StateMachine<TrafficState, TrafficTrigger>(_user!.State == (int)TrafficState.New ? TrafficState.New : (TrafficState)_user!.State-1);
+        var stateMachine = new StateMachine<TrafficState, TrafficTrigger>(state == (int)TrafficState.New ? TrafficState.New : (TrafficState)state);
         // Define the state transitions
-        _stateMachine.Configure(TrafficState.New)
-            .OnEntry(() => _stateMachine.Fire(TrafficTrigger.Go))
+        stateMachine.Configure(TrafficState.New)
             .Permit(TrafficTrigger.Go, TrafficState.Name);
 
-
-        _stateMachine.Configure(TrafficState.Name)
+        stateMachine.Configure(TrafficState.Name)
             .OnEntry(() =>
             {
-                _user.State = (int)CurrentState;
+                var user = GetTempUser(_command!.UserId);
+                user.IdTelegram=_command!.UserId;
+                user.State = (int)CurrentState(stateMachine);
                 if (_command!.UserCommand != _command!.Command)
-                    _user!.Name = _command!.UserCommand!;
+                    user.Name = _command!.UserCommand!;
                 _ansfer = "Добро пожаловать!\nНеобходимо пройти процедуру регистрации!\nВведите ваше имя:";
-                radisRepository.StringSet("Reg: "+_command!.UserId, JsonSerializer.Serialize(_user));
+                radisRepository.StringSet("Reg: "+_command!.UserId, JsonSerializer.Serialize(user));
             })
             .Permit(TrafficTrigger.Go, TrafficState.Email);
         
-        _stateMachine.Configure(TrafficState.Email)
+        stateMachine.Configure(TrafficState.Email)
             .OnEntry(() =>
             {
+                var user = GetTempUser(_command!.UserId);
+                
                 if (_command!.UserCommand != _command!.Command)
-                    _user!.Name = _command!.UserCommand!;
-                _user.State = (int)CurrentState;
-                radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
+                    user.Name = _command!.UserCommand!;
+        
+                user.State = (int)CurrentState(stateMachine);
+                radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(user));
                 _ansfer = "Введите Email:";
                 
             })
             .Permit(TrafficTrigger.Go, TrafficState.Phone);
         
-        _stateMachine.Configure(TrafficState.Phone)
+        stateMachine.Configure(TrafficState.Phone)
             .OnEntry(() =>
             {
+                var user = GetTempUser(_command!.UserId);
                 if (_command!.UserCommand != _command!.Command)
-                    _user!.email = _command!.UserCommand!;
-                _user.State = (int)CurrentState;
-                radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
+                    user.Email = _command!.UserCommand!;
+                user.State = (int)CurrentState(stateMachine);
+                radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(user));
                 _ansfer = "Введите телефон:";
                 
             })
             .Permit(TrafficTrigger.Go, TrafficState.Age);
         
-        _stateMachine.Configure(TrafficState.Age)
+        stateMachine.Configure(TrafficState.Age)
             .OnEntry(() =>
             {
-
+                var user = GetTempUser(_command!.UserId);
                 if (_command!.UserCommand != _command!.Command)
-                    _user!.PhoneNumber = _command!.UserCommand!;
-                
-                _user.State = (int)CurrentState;
-                radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
+                    user.PhoneNumber = _command!.UserCommand!;
+                user.State = (int)CurrentState(stateMachine);
+                radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(user));
                 _ansfer = "Введите ваш возраст:";
                 
             })
             .Permit(TrafficTrigger.Go, TrafficState.Finished);
         
-        _stateMachine.Configure(TrafficState.Finished)
+        stateMachine.Configure(TrafficState.Finished)
             .OnEntry(async void () =>
             {
+                var user = GetTempUser(_command!.UserId);
                 try
                 {
                     if (_command!.UserCommand != _command!.Command)
-                        _user.Age = int.Parse(_command!.UserCommand!);
+                        user.Age = int.Parse(_command!.UserCommand!);
                     
-                    _user.State = (int)CurrentState;
+                    user.State = (int)CurrentState(stateMachine);
                     _ansfer = "Вы успешно зарегистрировались!";
-                    radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(_user));
-                    await userRepository.AddUser(_user!);
+                    radisRepository.StringSet("Reg: "+_command.UserId, JsonSerializer.Serialize(user));
+                    await userRepository.AddUser(user);
                     
                 }
                 catch (Exception e)
@@ -109,24 +117,25 @@ public class StartCommandHandler(IUserRepository userRepository, IRadisRepositor
             })
             .Permit(TrafficTrigger.Go, TrafficState.New);
         
+        return stateMachine;
     }
 
-    public void SetRegUser()
+    private User GetTempUser(long? userId)
     {
-        var jsonUser = radisRepository.StringGet("Reg: " + _command!.UserId);
+        var jsonUser = radisRepository.StringGet("Reg: " + userId);
 
         if (jsonUser != "")
-            _user = JsonSerializer.Deserialize<User>(jsonUser);
-        else 
-            _user = null ?? new User();
+            return JsonSerializer.Deserialize<User>(jsonUser) ?? new User();
+      
+        return new User();
     }
 
 
-    private TrafficState CurrentState => _stateMachine!.State;
+    private static TrafficState CurrentState(StateMachine<TrafficState, TrafficTrigger> sm) => sm.State;
 
-    private void Trigger(TrafficTrigger trigger)
+    private static void Trigger(TrafficTrigger trigger, StateMachine<TrafficState, TrafficTrigger> sm)
     {
-        _stateMachine!.Fire(trigger);
+        sm.Fire(trigger);
     }
 
 }

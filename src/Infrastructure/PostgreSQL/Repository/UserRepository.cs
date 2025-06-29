@@ -19,7 +19,7 @@ namespace Infrastructure.PostgreSQL.Repository
             if (string.IsNullOrEmpty(email))
                 throw new ArgumentException("Email пользователя не может быть пустым", nameof(email));
                 
-            return await _dbSet.FirstOrDefaultAsync(u => u.email == email);
+            return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
@@ -109,6 +109,14 @@ namespace Infrastructure.PostgreSQL.Repository
         {
             _context.Users.AddRange(user);
             await _context.SaveChangesAsync();
+        }
+        
+        public async Task<User> FindByIdTelegram(long? id)
+        {
+            if (id==null)
+                throw new ArgumentException("Telegram ID не может быть пустым", nameof(id));
+                
+            return (await _dbSet.FirstOrDefaultAsync(u => u.IdTelegram == id))!;
         }
     }
 } 
