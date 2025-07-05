@@ -50,10 +50,8 @@ public class TelegramBotHostedService(
                     {
                         Keyboard = new []
                         {
-                            new [] { new KeyboardButton(BotCommands.Start) },
-                            new [] { new KeyboardButton(BotCommands.Help) },
-                            new [] { new KeyboardButton(BotCommands.Profile) },
-                            new [] { new KeyboardButton(BotCommands.Project) }
+                            new [] { new KeyboardButton(BotCommands.Start), new KeyboardButton(BotCommands.Help) },
+                            new [] { new KeyboardButton(BotCommands.Profile), new KeyboardButton(BotCommands.Project) }
                         },
                         ResizeKeyboard = true
                     };
