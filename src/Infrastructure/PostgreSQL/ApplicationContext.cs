@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+
 using Domain.Entities;
 using Infrastructure.PostgreSQL.Configurations;
 using Microsoft.EntityFrameworkCore;
