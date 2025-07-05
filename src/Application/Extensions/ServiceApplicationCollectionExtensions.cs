@@ -1,14 +1,13 @@
 using System.Reflection;
 using Application.CommandHandlers.Help;
 using Application.CommandHandlers.Profile;
+using Application.CommandHandlers.Project;
 using Application.CommandHandlers.Start;
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;
+using Domain.Commands.Project;
 using Domain.Commands.Start;
-using Domain.Repositories;
-using Infrastructure.PostgreSQL;
-using Infrastructure.PostgreSQL.Repository;
 using Infrastructure.Telegram;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +21,7 @@ public static class ServiceApplicationCollectionExtensions
         services.AddTransient<ICommandHandler<StartCommand>, StartCommandHandler>();
         services.AddTransient<ICommandHandler<HelpCommand>, HelpCommandHandler>();
         services.AddTransient<ICommandHandler<ProfileCommand>, ProfileCommandHandler>();
+        services.AddTransient<ICommandHandler<ProjectCommand>, ProjectCommandHandler>();
 
         services.AddTransient<ICommandRouting, CommandRouter>(sp =>
         {

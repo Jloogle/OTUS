@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;
+using Domain.Commands.Project;
 using Domain.Commands.Start;
 using Domain.Constants;
 using Infrastructure.Configuration.Telegram;
@@ -13,23 +14,14 @@ using TelegramTypes = Telegram.Bot.Types;
 
 namespace Infrastructure.Telegram;
 
-public class TelegramBotHostedService : BackgroundService
+public class TelegramBotHostedService(
+    ITelegramSettings telegramSettings,
+    ICommandRouting commandRouter)
+    : BackgroundService
 {
-    private readonly ITelegramSettings _telegramSettings;
-    private readonly ITelegramBotClient _botClient;
-    private readonly ICommandRouting _commandRouter;
-    private static readonly ConcurrentDictionary<int, ICommand> Lastcommands = new();
-    
-    public TelegramBotHostedService(
-        ITelegramSettings telegramSettings,
-        ICommandRouting commandRouter
-    )
-    {
-        _telegramSettings = telegramSettings;
-        _botClient = new TelegramBotClient(_telegramSettings.Token);
-        _commandRouter = commandRouter;
-    }
-    
+    private readonly ITelegramBotClient _botClient = new TelegramBotClient(telegramSettings.Token);
+    private static readonly ConcurrentDictionary<int, ICommand> LastCommands = new();
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var cancellationTokenSource = new CancellationTokenSource();
@@ -50,8 +42,8 @@ public class TelegramBotHostedService : BackgroundService
 
             if (command != null)
             {
-                Lastcommands.AddOrUpdate((int)update.Message.Chat.Id, command, (k, v) => command);
-                var messageForUser = await _commandRouter.RouteAsync(command);
+                LastCommands.AddOrUpdate((int)update.Message.Chat.Id, command, (k, v) => command);
+                var messageForUser = await commandRouter.RouteAsync(command);
                 if (messageForUser != null)
                 {
                     await _botClient.SendMessage(
@@ -72,9 +64,9 @@ public class TelegramBotHostedService : BackgroundService
         var trigger = parts[0];
         
      
-        if (!Lastcommands.IsEmpty && trigger[0] != '/')
+        if (!LastCommands.IsEmpty && trigger[0] != '/')
         {
-             trigger = Lastcommands.FirstOrDefault(x => x.Key == (int)update.Message.Chat.Id).Value.Command.ToString();
+             trigger = LastCommands.FirstOrDefault(x => x.Key == (int)update.Message.Chat.Id).Value.Command.ToString();
         }
 
         
@@ -90,6 +82,10 @@ public class TelegramBotHostedService : BackgroundService
                 UserId = update.Message.From?.Id
             },
             BotCommands.Profile => new ProfileCommand
+            {
+                UserId = update.Message.From?.Id
+            },
+            BotCommands.Project => new ProjectCommand
             {
                 UserId = update.Message.From?.Id
             },

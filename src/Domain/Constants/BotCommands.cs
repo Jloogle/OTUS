@@ -12,6 +12,8 @@ public static class BotCommands
     public const string Profile = "/profile";
     [Commands("Help по функциям.")]
     public const string Help = "/help";
+    [Commands("Начало работы с проектами.")]
+    public const string Project = "/project";
     [Commands("Создание проекта - /project_create [название задачи] [проект] [исполнитель] [дедлайн].")]
     public const string ProjectCreate = "/project_create";
     [Commands("Удаление проекта - /project_delete [Id проекта].")]

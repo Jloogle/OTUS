@@ -1,6 +1,7 @@
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;
+using Domain.Commands.Project;
 using Domain.Commands.Start;
 using Domain.Constants;
 
@@ -23,6 +24,7 @@ public class CommandRouter : ICommandRouting
             RegisterRoute<StartCommand>(handler, BotCommands.Start);
             RegisterRoute<HelpCommand>(handler, BotCommands.Help);
             RegisterRoute<ProfileCommand>(handler, BotCommands.Profile);
+            RegisterRoute<ProjectCommand>(handler, BotCommands.Project);
         }
     }
     
