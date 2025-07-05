@@ -10,8 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
-using TelegramTypes = Telegram.Bot.Types;
-
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 namespace Infrastructure.Telegram;
 
 public class TelegramBotHostedService(
@@ -26,15 +26,15 @@ public class TelegramBotHostedService(
     {
         var cancellationTokenSource = new CancellationTokenSource();
         _botClient.StartReceiving(
-            HandleUpdateAsync,
-            HandleErrorAsync,
-            new ReceiverOptions { AllowedUpdates = Array.Empty<UpdateType>() },
+            updateHandler: HandleUpdateAsync,
+            errorHandler: HandleErrorAsync,
+            receiverOptions: new ReceiverOptions { AllowedUpdates = Array.Empty<UpdateType>() },
             cancellationToken: cancellationTokenSource.Token
         );
         await Task.CompletedTask;
     }
     
-    private async Task HandleUpdateAsync(ITelegramBotClient botClient,TelegramTypes.Update update, CancellationToken cancellationToken)
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Message is { Text: not null } message)
         {   
@@ -46,9 +46,22 @@ public class TelegramBotHostedService(
                 var messageForUser = await commandRouter.RouteAsync(command);
                 if (messageForUser != null)
                 {
-                    await _botClient.SendMessage(
+                    var replyMarkup = new ReplyKeyboardMarkup
+                    {
+                        Keyboard = new []
+                        {
+                            new [] { new KeyboardButton(BotCommands.Start) },
+                            new [] { new KeyboardButton(BotCommands.Help) },
+                            new [] { new KeyboardButton(BotCommands.Profile) },
+                            new [] { new KeyboardButton(BotCommands.Project) }
+                        },
+                        ResizeKeyboard = true
+                    };
+
+                    await botClient.SendMessage(
                         chatId: message.Chat.Id,
                         text: messageForUser,
+                        replyMarkup: replyMarkup,
                         cancellationToken: cancellationToken
                     );
                 }
@@ -56,20 +69,18 @@ public class TelegramBotHostedService(
         }
     }
     
-    private static ICommand? ParseCommand(TelegramTypes.Update update)
+    private static ICommand? ParseCommand(Update update)
     {
         if (update.Message?.Text is null) return null;
         
         var parts = update.Message.Text.Split(' ');
         var trigger = parts[0];
         
-     
         if (!LastCommands.IsEmpty && trigger[0] != '/')
         {
              trigger = LastCommands.FirstOrDefault(x => x.Key == (int)update.Message.Chat.Id).Value.Command.ToString();
         }
 
-        
         return trigger switch
         {
             BotCommands.Start => new StartCommand
