@@ -36,7 +36,12 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     /// </returns>
     public async Task<int> AddProjectAsync(string name, DateTime deadline)  
     {
-        var project1 = new Project { Name = name, Deadline = deadline };
+        // Convert the deadline to UTC if it's not already
+        var utcDeadline = deadline.Kind == DateTimeKind.Utc 
+            ? deadline 
+            : DateTime.SpecifyKind(deadline, DateTimeKind.Utc);
+
+        var project1 = new Project { Name = name, Deadline = utcDeadline };
         _context.Projects.AddRange(project1);
         return await _context.SaveChangesAsync();
     }
