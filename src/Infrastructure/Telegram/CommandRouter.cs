@@ -25,6 +25,9 @@ public class CommandRouter : ICommandRouting
             RegisterRoute<HelpCommand>(handler, BotCommands.Help);
             RegisterRoute<ProfileCommand>(handler, BotCommands.Profile);
             RegisterRoute<ProjectCommand>(handler, BotCommands.Project);
+            RegisterRoute<AddProjectCommand>(handler, BotCommands.AddProject);
+            RegisterRoute<DeleteProjectCommand>(handler, BotCommands.ProjectDelete);
+            RegisterRoute<ListProjectCommand>(handler, BotCommands.ListMyProjects);
         }
     }
     

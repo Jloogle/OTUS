@@ -14,10 +14,15 @@ public static class BotCommands
     public const string Help = "/help";
     [Commands("Начало работы с проектами.")]
     public const string Project = "/project";
-    [Commands("Создание проекта - /project_create [название задачи] [проект] [исполнитель] [дедлайн].")]
-    public const string ProjectCreate = "/project_create";
     [Commands("Удаление проекта - /project_delete [Id проекта].")]
     public const string ProjectDelete = "/project_delete";
+    [Commands("Создание проекта - /add_project [название задачи] [проект] [исполнитель] [дедлайн].")]
+    public const string AddProject = "/add_project";
+    [Commands("Вернуться в начало.")]
+    public const string Back = "/start";
+    [Commands("Вернуться в начало.")]
+    public const string ListMyProjects = "/list_my_projects";   
+
 
     public static List<string?> GetAllCommands()
     {

@@ -46,15 +46,8 @@ public class TelegramBotHostedService(
                 var messageForUser = await commandRouter.RouteAsync(command);
                 if (messageForUser != null)
                 {
-                    var replyMarkup = new ReplyKeyboardMarkup
-                    {
-                        Keyboard = new []
-                        {
-                            new [] { new KeyboardButton(BotCommands.Start), new KeyboardButton(BotCommands.Help) },
-                            new [] { new KeyboardButton(BotCommands.Profile), new KeyboardButton(BotCommands.Project) }
-                        },
-                        ResizeKeyboard = true
-                    };
+                    
+                    var replyMarkup = RouterKeyboard(update.Message.Text);
 
                     await botClient.SendMessage(
                         chatId: message.Chat.Id,
@@ -65,6 +58,37 @@ public class TelegramBotHostedService(
                 }
             }
         }
+    }
+    
+    private ReplyKeyboardMarkup RouterKeyboard(string? command)
+    {
+        ReplyKeyboardMarkup replyMarkup;
+        if (command == BotCommands.Project)
+        {
+              replyMarkup = new ReplyKeyboardMarkup
+               {
+                   Keyboard =
+                   [
+                       [new KeyboardButton(BotCommands.AddProject), new KeyboardButton(BotCommands.ListMyProjects)],
+                       [new KeyboardButton(BotCommands.Back), new KeyboardButton(BotCommands.ProjectDelete)]
+                   ],
+                   ResizeKeyboard = true
+               };
+        }
+        else
+        {
+            replyMarkup = new ReplyKeyboardMarkup
+            {
+                Keyboard =
+                [
+                    [new KeyboardButton(BotCommands.Start), new KeyboardButton(BotCommands.Help)],
+                    [new KeyboardButton(BotCommands.Profile), new KeyboardButton(BotCommands.Project)]
+                ],
+                ResizeKeyboard = true
+            };
+        }
+        
+        return replyMarkup;
     }
     
     private static ICommand? ParseCommand(Update update)
@@ -95,6 +119,18 @@ public class TelegramBotHostedService(
                 UserId = update.Message.From?.Id
             },
             BotCommands.Project => new ProjectCommand
+            {
+                UserId = update.Message.From?.Id
+            },
+            BotCommands.AddProject => new AddProjectCommand
+            {
+                UserId = update.Message.From?.Id
+            },
+            BotCommands.ProjectDelete => new DeleteProjectCommand
+            {
+                UserId = update.Message.From?.Id
+            },
+            BotCommands.ListMyProjects => new ListProjectCommand()
             {
                 UserId = update.Message.From?.Id
             },

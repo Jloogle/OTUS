@@ -22,6 +22,9 @@ public static class ServiceApplicationCollectionExtensions
         services.AddTransient<ICommandHandler<HelpCommand>, HelpCommandHandler>();
         services.AddTransient<ICommandHandler<ProfileCommand>, ProfileCommandHandler>();
         services.AddTransient<ICommandHandler<ProjectCommand>, ProjectCommandHandler>();
+        services.AddTransient<ICommandHandler<AddProjectCommand>, AddProjectCommandHandler>();
+        services.AddTransient<ICommandHandler<DeleteProjectCommand>, DeleteProjectCommandHandler>();
+        services.AddTransient<ICommandHandler<ListProjectCommand>, ListProjectCommandHandler>();
 
         services.AddTransient<ICommandRouting, CommandRouter>(sp =>
         {
