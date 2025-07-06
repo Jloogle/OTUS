@@ -33,5 +33,16 @@ namespace Domain.Repositories
         /// Удалить пользователя из проекта
         /// </summary>
         Task RemoveUserFromProjectAsync(int projectId, int userId);
+
+        /// <summary>
+        /// Asynchronously adds a new project to the database.
+        /// </summary>
+        /// <param name="name">The name of the project to be added. Must not be null or empty.</param>
+        /// <param name="deadline">The deadline for the project completion.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task result contains
+        /// the number of state entries written to the database.
+        /// </returns>
+        public Task<int> AddProjectAsync(string name, DateTime deadline);
     }
 } 
