@@ -129,7 +129,8 @@ public class TelegramBotHostedService(
             },
             BotCommands.ProjectDelete => new DeleteProjectCommand
             {
-                UserId = update.Message.From?.Id
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
             },
             BotCommands.ListMyProjects => new ListProjectCommand()
             {
