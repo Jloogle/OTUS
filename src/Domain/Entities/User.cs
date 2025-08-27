@@ -12,6 +12,6 @@ public class User
     [NotMapped]
     public int State { get; set; }
     public long? IdTelegram { get; set; }
-    public List<Project> Projects { get; set; }= [];
+    public List<Project?> Projects { get; set; }= [];
     public List<Role> Role { get; set; }= [];
 }

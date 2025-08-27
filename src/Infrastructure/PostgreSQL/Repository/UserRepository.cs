@@ -33,7 +33,7 @@ namespace Infrastructure.PostgreSQL.Repository
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Project>> GetUserProjectsAsync(int userId)
+        public async Task<IEnumerable<Project?>> GetUserProjectsAsync(int userId)
         {
             var user = await _dbSet
                 .Include(u => u.Projects)
@@ -42,7 +42,7 @@ namespace Infrastructure.PostgreSQL.Repository
             if (user == null)
                 throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
                 
-            return user.Projects ?? new List<Project>();
+            return user.Projects ?? new List<Project?>();
         }
         
         /// <summary>

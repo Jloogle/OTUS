@@ -44,5 +44,7 @@ namespace Domain.Repositories
         /// the number of state entries written to the database.
         /// </returns>
         public Task<int> AddProjectAsync(string name, DateTime deadline);
+
+        public Task RemoveProjectAsync(int projectId);
     }
 } 

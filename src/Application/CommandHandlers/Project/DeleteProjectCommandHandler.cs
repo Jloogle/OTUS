@@ -27,10 +27,10 @@ public class DeleteProjectCommandHandler : ICommandHandler<DeleteProjectCommand>
             return "Некорректный ID проекта.";
         }
 
-        var project = await _projectRepository.GetByIdAsync(projectId);
-
-        await _projectRepository.DeleteAsync(project);
         
-        return $"Проект '{project.Name}' (ID: {projectId}) успешно удален.";
+
+        await _projectRepository.RemoveProjectAsync(projectId);
+        
+        return $"Проект (ID: {projectId}) успешно удален.";
     }
 }

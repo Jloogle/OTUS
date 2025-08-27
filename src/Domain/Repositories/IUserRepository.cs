@@ -25,7 +25,7 @@ namespace Domain.Repositories
         /// <summary>
         /// Получить проекты пользователя
         /// </summary>
-        Task<IEnumerable<Project>> GetUserProjectsAsync(int userId);
+        Task<IEnumerable<Project?>> GetUserProjectsAsync(int userId);
         
         /// <summary>
         /// Добавить роль пользователю

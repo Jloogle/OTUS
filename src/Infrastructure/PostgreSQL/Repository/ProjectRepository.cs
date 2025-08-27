@@ -130,4 +130,17 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             throw;
         }
     }
+    
+    /// <summary>
+    /// Удалить пользователя из проекта
+    /// </summary>
+    public async Task RemoveProjectAsync(int projectId)
+    {
+        var project = await _context.Projects.FindAsync(projectId);
+        if (project != null)
+        {
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+        }
+    }
 }
