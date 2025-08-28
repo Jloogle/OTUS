@@ -137,4 +137,38 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
             throw;
         }
     }
+
+    public async Task DeleteTaskAsync(int taskId)
+    {
+        var task = await _dbSet
+            .Include(t => t.Project)
+            .FirstOrDefaultAsync(t => t.Id == taskId)
+            ?? throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+
+            // Создаем уведомление об удалении задачи
+            var deleteNotification = new Notification
+            {
+                Name = "Удаление задачи",
+                Age = DateTime.UtcNow,
+                Description = $"Задача '{task.Name}' была удалена из проекта '{task.Project?.Name}'"
+            };
+
+            await _context.Notifications.AddAsync(deleteNotification);
+
+            // Удаляем задачу
+            _dbSet.Remove(task);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 }

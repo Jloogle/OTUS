@@ -3,6 +3,7 @@ using Domain.Commands.Help;
 using Domain.Commands.Profile;
 using Domain.Commands.Project;
 using Domain.Commands.Start;
+using Domain.Commands.Task;
 using Domain.Constants;
 
 namespace Infrastructure.Telegram;
@@ -28,6 +29,7 @@ public class CommandRouter : ICommandRouting
             RegisterRoute<AddProjectCommand>(handler, BotCommands.AddProject);
             RegisterRoute<DeleteProjectCommand>(handler, BotCommands.ProjectDelete);
             RegisterRoute<ListProjectCommand>(handler, BotCommands.ListMyProjects);
+            RegisterRoute<ChangeTaskCommand>(handler, BotCommands.ChangeTask);
         }
     }
     

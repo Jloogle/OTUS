@@ -4,6 +4,7 @@ using Domain.Commands.Help;
 using Domain.Commands.Profile;
 using Domain.Commands.Project;
 using Domain.Commands.Start;
+using Domain.Commands.Task;
 using Domain.Constants;
 using Infrastructure.Configuration.Telegram;
 using Microsoft.Extensions.Hosting;
@@ -70,6 +71,7 @@ public class TelegramBotHostedService(
                    Keyboard =
                    [
                        [new KeyboardButton(BotCommands.AddProject), new KeyboardButton(BotCommands.ListMyProjects)],
+                       [new KeyboardButton(BotCommands.ListMyTasks), new KeyboardButton(BotCommands.ChangeTask)],
                        [new KeyboardButton(BotCommands.Back), new KeyboardButton(BotCommands.ProjectDelete)]
                    ],
                    ResizeKeyboard = true
@@ -135,6 +137,11 @@ public class TelegramBotHostedService(
             BotCommands.ListMyProjects => new ListProjectCommand()
             {
                 UserId = update.Message.From?.Id
+            },
+            BotCommands.ChangeTask => new ChangeTaskCommand()
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
             },
             _ => null
         };

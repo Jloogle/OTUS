@@ -28,5 +28,12 @@ namespace Domain.Repositories
         /// Назначить задачу пользователю
         /// </summary>
         Task AssignTaskToUserAsync(int taskId, int userId);
+
+        /// <summary>
+        /// Удалить задачу по ID
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        public Task DeleteTaskAsync(int taskId);
     }
 } 

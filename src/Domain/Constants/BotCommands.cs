@@ -20,8 +20,13 @@ public static class BotCommands
     public const string AddProject = "/add_project";
     [Commands("Вернуться в начало.")]
     public const string Back = "/start";
-    [Commands("Вернуться в начало.")]
-    public const string ListMyProjects = "/list_my_projects";   
+    [Commands("Показать мои проекты.")]
+    public const string ListMyProjects = "/list_my_projects";
+    [Commands("Показать мои задачи.")]
+    public const string ListMyTasks = "/list_my_tasks";
+    [Commands("Добавить или удалить задачу.")]
+    public const string ChangeTask = "/change_task";
+    
 
 
     public static List<string?> GetAllCommands()

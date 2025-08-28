@@ -2,12 +2,14 @@ using System.Reflection;
 using Application.CommandHandlers.Help;
 using Application.CommandHandlers.Profile;
 using Application.CommandHandlers.Project;
+using Application.CommandHandlers.ProjectTask;
 using Application.CommandHandlers.Start;
 using Domain.Commands;
 using Domain.Commands.Help;
 using Domain.Commands.Profile;
 using Domain.Commands.Project;
 using Domain.Commands.Start;
+using Domain.Commands.Task;
 using Infrastructure.Telegram;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,6 +27,7 @@ public static class ServiceApplicationCollectionExtensions
         services.AddTransient<ICommandHandler<AddProjectCommand>, AddProjectCommandHandler>();
         services.AddTransient<ICommandHandler<DeleteProjectCommand>, DeleteProjectCommandHandler>();
         services.AddTransient<ICommandHandler<ListProjectCommand>, ListProjectCommandHandler>();
+        services.AddTransient<ICommandHandler<ChangeTaskCommand>, ChangeTaskCommandHandler>();
 
         services.AddTransient<ICommandRouting, CommandRouter>(sp =>
         {

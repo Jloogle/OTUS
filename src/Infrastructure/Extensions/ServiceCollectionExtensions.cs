@@ -18,9 +18,10 @@ namespace Infrastructure.Extensions
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IProjectRepository, ProjectRepository>();
             services.AddTransient<IAdapterApplicationContext, AdapterApplicationContext>();
-            services.AddScoped<ITaskRepository, TaskRepository>();
+            services.AddTransient<ITaskRepository, TaskRepository>();
             services.AddTransient<IAdapterMultiplexer, AdapterMultiplexer>();
             services.AddTransient<IRadisRepository, RadisRepositoty>();
+
 
 
             return services;
