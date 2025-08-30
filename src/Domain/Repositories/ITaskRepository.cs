@@ -37,5 +37,7 @@ namespace Domain.Repositories
         public Task DeleteTaskAsync(int taskId);
 
         public Task<ProjTask> AddTaskAsync(ProjTask task, int projectId);
+
+        public Task<ProjTask> UpdateTaskAsync(ProjTask updatedTask);
     }
 } 

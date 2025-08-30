@@ -43,6 +43,18 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
                     return "Неверный формат ID задачи.";
                 }
             }
+            else if (action == "assign" && parsedCommand.Length == 3)
+            {
+                if (int.TryParse(parsedCommand[1], out var taskId) && int.TryParse(parsedCommand[2], out var userId))
+                {
+                    await taskRepository.AssignTaskToUserAsync(taskId, userId);
+                    return $"Пользователь с ID {userId} успешно назначен на задачу с ID {taskId}.";
+                }
+                else
+                {
+                    return "Неверный формат ID задачи или пользователя.";
+                }
+            }
             else if (parsedCommand.Length == 3 && int.TryParse(parsedCommand[0], out var updateTaskId))
             {
                 var newTaskName = parsedCommand[1];
@@ -54,13 +66,13 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
                 projTask.Name = newTaskName;
                 projTask.Description = newDescription;
                     
-                await taskRepository.UpdateAsync(projTask);
+                await taskRepository.UpdateTaskAsync(projTask);
                 return $"Задача с ID {updateTaskId} успешно обновлена. Новое название: '{newTaskName}'.";
 
             }
         }
         
-        return await Task.FromResult("Управление задачами:\n- Добавить: /change_task [add] [название задачи] [дедлайн]\n- Удалить: /change_task [del] [ID задачи]\n- Изменить: /change_task [ID задачи] [новое название] [новый дедлайн]");
+        return await Task.FromResult("Управление задачами:\n- Добавить: /change_task [add] [название задачи] [дедлайн]\n- Удалить: /change_task [del] [ID задачи]\n- Назначить: /change_task [assign] [ID задачи] [ID пользователя]\n- Изменить: /change_task [ID задачи] [новое название] [новый дедлайн]");
     }
 
     private string[] ParseChangeTaskCommand(string userCommand)

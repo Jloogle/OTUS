@@ -79,6 +79,17 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
         }
     }
 
+    public async Task<ProjTask> UpdateTaskAsync(ProjTask updatedTask)
+    {
+        if (updatedTask == null)
+            throw new ArgumentNullException(nameof(updatedTask));
+        
+        _context.Tasks.Update(updatedTask);
+        await _context.SaveChangesAsync();
+        return updatedTask;
+
+    }
+
     public async Task ChangeTaskStatusAsync(int taskId, string status)
     {
         if (string.IsNullOrEmpty(status))
@@ -202,7 +213,7 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
             await _context.Notifications.AddAsync(deleteNotification);
 
             // Удаляем задачу
-            _dbSet.Remove(task);
+            _context.Tasks.Remove(task);
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
