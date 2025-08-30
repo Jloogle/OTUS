@@ -1,3 +1,4 @@
+
 using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -260,5 +261,23 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
             task.AssignedUsers.Remove(userToRemove);
             await _context.SaveChangesAsync();
         }
+    }
+    
+    public async Task<IEnumerable<ProjTask>> GetAllTasksAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
+    public async Task<IEnumerable<ProjTask>> GetTasksByUserIdAsync(long? IdTelegram)
+    {
+        var user = await _context.Users
+            .Include(u => u.Projects)
+            .ThenInclude(p => p.ProjTasks)
+            .FirstOrDefaultAsync(u => u.IdTelegram == IdTelegram);
+        
+        if (user == null)
+            return new List<ProjTask>();
+        
+        return user.Projects.SelectMany(p => p.ProjTasks).ToList();
     }
 }

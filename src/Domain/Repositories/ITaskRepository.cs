@@ -39,5 +39,8 @@ namespace Domain.Repositories
         public Task<ProjTask> AddTaskAsync(ProjTask task, int projectId);
 
         public Task<ProjTask> UpdateTaskAsync(ProjTask updatedTask);
+        
+        Task<IEnumerable<ProjTask>> GetAllTasksAsync();
+        Task<IEnumerable<ProjTask>> GetTasksByUserIdAsync(long? userId);
     }
 } 

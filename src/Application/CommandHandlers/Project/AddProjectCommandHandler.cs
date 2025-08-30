@@ -28,7 +28,7 @@ public class AddProjectCommandHandler(IProjectRepository projectRepository) : IC
             }
         }
         
-        return await Task.FromResult("Создание проекта - /add_project [название задачи] [дедлайн].");
+        return await Task.FromResult("Создание проекта - /add_project [название проекта] [дедлайн].");
     }
     
     private static DateTime? ConvertToDateTime(string value)
