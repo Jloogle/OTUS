@@ -35,5 +35,7 @@ namespace Domain.Repositories
         /// <param name="taskId"></param>
         /// <returns></returns>
         public Task DeleteTaskAsync(int taskId);
+
+        public Task<ProjTask> AddTaskAsync(ProjTask task, int projectId);
     }
 } 

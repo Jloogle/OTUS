@@ -36,6 +36,48 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
         // Собираем все задачи из всех проектов пользователя
         return user.Projects.SelectMany(p => p.ProjTasks).ToList();
     }
+    
+    public async Task<ProjTask> AddTaskAsync(ProjTask task, int projectId)
+    {
+        if (task == null)
+            throw new ArgumentNullException(nameof(task));
+    
+        var project = await _context.Projects.FindAsync(projectId)
+                      ?? throw new InvalidOperationException($"Проект с ID {projectId} не найден");
+    
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // Привязываем задачу к проекту
+            task.Project = project;
+            
+            // Добавляем задачу
+            await _dbSet.AddAsync(task);
+    
+            // Создаем уведомление о создании задачи
+            var notification = new Notification
+            {
+                Name = "Создание задачи",
+                Age = DateTime.UtcNow,
+                Description = $"Создана новая задача '{task.Name}' в проекте '{project.Name}'"
+            };
+    
+            await _context.Notifications.AddAsync(notification);
+            await _context.SaveChangesAsync();
+    
+            // Добавляем связь между уведомлением и задачей после сохранения
+            notification.Tasks.Add(task);
+            await _context.SaveChangesAsync();
+            
+            await transaction.CommitAsync();
+            return task;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 
     public async Task ChangeTaskStatusAsync(int taskId, string status)
     {

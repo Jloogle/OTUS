@@ -15,7 +15,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         {
             var action = parsedCommand[0].ToLower();
             
-            if (action == "add" && parsedCommand.Length == 3)
+            if (action == "add" && parsedCommand.Length == 4)
             {
                 var taskName = parsedCommand[1];
                 var newDescription = parsedCommand[2];
@@ -23,7 +23,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
                 if (newDescription.Length>0)
                 {
                     
-                    await taskRepository.AddAsync(new ProjTask() { Name = taskName, Description = newDescription });
+                    await taskRepository.AddTaskAsync(new ProjTask() { Name = taskName, Description = newDescription }, Convert.ToInt32(parsedCommand[3]));
                     return $"Задача '{taskName}' успешно добавлена. ";
                 }
                 else
