@@ -30,7 +30,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithMany(x => x.Users);
 
         builder
-            .HasMany(x => x.Role)
-            .WithMany(x => x.Users);
+            .HasMany(x => x.AssignedTasks)
+            .WithMany(x => x.AssignedUsers);
     }
 } 

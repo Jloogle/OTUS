@@ -131,6 +131,7 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
     {
         var task = await _dbSet
             .Include(t => t.Project)
+            .Include(t => t.AssignedUsers)
             .FirstOrDefaultAsync(t => t.Id == taskId)
             ?? throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
             
@@ -140,35 +141,33 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
             
         if (task.Project == null)
             throw new InvalidOperationException($"Задача с ID {taskId} не привязана к проекту");
-
-        // Используем транзакцию для обеспечения целостности
+    
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            // Сначала проверяем, относится ли пользователь к проекту
-            var project = await _context.Projects
-                .Include(p => p.Users)
-                .FirstOrDefaultAsync(p => p.Id == task.Project.Id);
-                
-            if (userId != 0 && !project.Users.Any(u => u.Id == userId))
-            {
-                // Если пользователя нет в проекте, добавляем его
-                project.Users.Add(user);
-            }
-            
             string message;
             if (userId == 0)
             {
+                // Снимаем все назначения с задачи
+                task.AssignedUsers.Clear();
                 message = $"Задача '{task.Name}' снята с назначения";
-                // В данной модели нет прямого свойства AssigneeId, оставляем примечание в Description
-                task.Description = $"[Снято назначение] {task.Description}";
             }
             else
             {
-                message = $"Задача '{task.Name}' назначена пользователю {user.Name}";
-                // В данной модели нет прямого свойства AssigneeId, оставляем примечание в Description
-                task.Description = $"[Назначена для: {user.Name}] {task.Description}";
+                // Проверяем, не назначена ли уже задача этому пользователю
+                if (!task.AssignedUsers.Any(u => u.Id == userId))
+                {
+                    task.AssignedUsers.Add(user);
+                    message = $"Задача '{task.Name}' назначена пользователю {user.Name}";
+                }
+                else
+                {
+                    message = $"Задача '{task.Name}' уже назначена пользователю {user.Name}";
+                }
             }
+            
+            // Сохраняем изменения в задаче
+            _context.Tasks.Update(task);
             
             // Создаем уведомление о назначении задачи
             var notification = new Notification
@@ -178,10 +177,13 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
                 Description = message
             };
             
-            notification.Tasks.Add(task);
-            
             await _context.Notifications.AddAsync(notification);
             await _context.SaveChangesAsync();
+            
+            // Добавляем связь между уведомлением и задачей после сохранения
+            notification.Tasks.Add(task);
+            await _context.SaveChangesAsync();
+            
             await transaction.CommitAsync();
         }
         catch
@@ -222,6 +224,41 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
         {
             await transaction.RollbackAsync();
             throw;
+        }
+    }
+    
+    // Добавим новые методы для работы с назначениями
+    public async Task<IEnumerable<User>> GetTaskAssignedUsersAsync(int taskId)
+    {
+        var task = await _dbSet
+            .Include(t => t.AssignedUsers)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
+        
+        return task?.AssignedUsers ?? new List<User>();
+    }
+
+    public async Task<IEnumerable<ProjTask>> GetUserAssignedTasksAsync(int userId)
+    {
+        var user = await _context.Users
+            .Include(u => u.AssignedTasks)
+            .ThenInclude(t => t.Project)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        
+        return user?.AssignedTasks ?? new List<ProjTask>();
+    }
+
+    public async Task RemoveUserFromTaskAsync(int taskId, int userId)
+    {
+        var task = await _dbSet
+            .Include(t => t.AssignedUsers)
+            .FirstOrDefaultAsync(t => t.Id == taskId)
+            ?? throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
+
+        var userToRemove = task.AssignedUsers.FirstOrDefault(u => u.Id == userId);
+        if (userToRemove != null)
+        {
+            task.AssignedUsers.Remove(userToRemove);
+            await _context.SaveChangesAsync();
         }
     }
 }

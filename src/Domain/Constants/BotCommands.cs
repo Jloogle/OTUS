@@ -16,15 +16,15 @@ public static class BotCommands
     public const string Project = "/project";
     [Commands("Удаление проекта - /project_delete [Id проекта].")]
     public const string ProjectDelete = "/project_delete";
-    [Commands("Создание проекта - /add_project [название задачи] [проект] [исполнитель] [дедлайн].")]
+    [Commands("Создание проекта - /add_project [название проекта] [описание] [исполнитель] [дедлайн].")]
     public const string AddProject = "/add_project";
     [Commands("Вернуться в начало.")]
-    public const string Back = "/start";
+    public const string Back = "/back";
     [Commands("Показать мои проекты.")]
     public const string ListMyProjects = "/list_my_projects";
     [Commands("Показать мои задачи.")]
     public const string ListMyTasks = "/list_my_tasks";
-    [Commands("Добавить или удалить задачу.")]
+    [Commands("Добавить или изменить задачу.")]
     public const string ChangeTask = "/change_task";
     
 

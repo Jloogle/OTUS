@@ -1,3 +1,4 @@
+
 using Domain.Entities;
 using Infrastructure.PostgreSQL.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -43,5 +44,29 @@ public sealed class ApplicationContext  : DbContext
         modelBuilder.ApplyConfiguration(new ProjectConfiguration());
         modelBuilder.ApplyConfiguration(new ProjTaskConfiguration());
         modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+        
+        // Настройка связи многие-ко-многим между User и ProjTask
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.AssignedTasks)
+            .WithMany(t => t.AssignedUsers)
+            .UsingEntity<Dictionary<string, object>>(
+                "UserTasks", // Имя промежуточной таблицы
+                j => j
+                    .HasOne<ProjTask>()
+                    .WithMany()
+                    .HasForeignKey("TaskId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j => j
+                    .HasOne<User>()
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("UserId", "TaskId");
+                    j.ToTable("UserTasks", "OTUS");
+                    j.HasIndex("UserId");
+                    j.HasIndex("TaskId");
+                });
     }
 }

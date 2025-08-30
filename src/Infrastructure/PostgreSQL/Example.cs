@@ -37,9 +37,9 @@ public class Example
             Role role3 = new Role() { Name = "Executor" };
             
             // для ролей тоже многие ко многим
-            user1.Role.Add(role1);
+            /*user1.Role.Add(role1);
             user2.Role.Add(role2);
-            user3.Role.Add(role3);
+            user3.Role.Add(role3);*/
             role3.Users.Add(user2);
             
             // добавляем их в бд

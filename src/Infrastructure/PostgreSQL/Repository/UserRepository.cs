@@ -22,16 +22,11 @@ namespace Infrastructure.PostgreSQL.Repository
             return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
+        public Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
         {
-            if (string.IsNullOrEmpty(roleName))
-                throw new ArgumentException("Название роли не может быть пустым", nameof(roleName));
-                
-            return await _dbSet
-                .Include(u => u.Role)
-                .Where(u => u.Role.Any(r => r.Name == roleName))
-                .ToListAsync();
+            throw new NotImplementedException();
         }
+
 
         public async Task<IEnumerable<Project?>> GetUserProjectsAsync(int userId)
         {
@@ -44,66 +39,17 @@ namespace Infrastructure.PostgreSQL.Repository
                 
             return user.Projects ?? new List<Project?>();
         }
-        
-        /// <summary>
-        /// Добавляет роль пользователю
-        /// </summary>
-        public async Task AddRoleToUserAsync(int userId, int roleId)
+
+        public Task AddRoleToUserAsync(int userId, int roleId)
         {
-            var user = await _dbSet
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Id == userId)
-                ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
-                
-            var role = await _context.Roles.FindAsync(roleId)
-                ?? throw new InvalidOperationException($"Роль с ID {roleId} не найдена");
-                
-            // Проверяем, есть ли уже такая роль у пользователя
-            if (user.Role.Any(r => r.Id == roleId))
-                return;
-                
-            // Используем транзакцию
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try 
-            {
-                user.Role.Add(role);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+            throw new NotImplementedException();
         }
-        
-        /// <summary>
-        /// Удаляет роль у пользователя
-        /// </summary>
-        public async Task RemoveRoleFromUserAsync(int userId, int roleId)
+
+        public Task RemoveRoleFromUserAsync(int userId, int roleId)
         {
-            var user = await _dbSet
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Id == userId)
-                ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
-                
-            var role = user.Role.FirstOrDefault(r => r.Id == roleId)
-                ?? throw new InvalidOperationException($"У пользователя нет роли с ID {roleId}");
-                
-            // Используем транзакцию
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try 
-            {
-                user.Role.Remove(role);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+            throw new NotImplementedException();
         }
+
 
         public async Task AddUser(User user)
         {

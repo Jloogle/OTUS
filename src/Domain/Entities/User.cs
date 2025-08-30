@@ -12,6 +12,10 @@ public class User
     [NotMapped]
     public int State { get; set; }
     public long? IdTelegram { get; set; }
-    public List<Project?> Projects { get; set; }= [];
-    public List<Role> Role { get; set; }= [];
+    
+    // Существующие связи
+    public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
+    
+    // Новая связь многие-ко-многим с задачами
+    public virtual ICollection<ProjTask> AssignedTasks { get; set; } = new List<ProjTask>();
 }

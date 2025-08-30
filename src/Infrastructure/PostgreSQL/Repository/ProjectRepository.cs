@@ -1,3 +1,4 @@
+
 using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -70,67 +71,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return project?.Users ?? new List<User>();
     }
     
-    /// <summary>
-    /// Добавить пользователя к проекту
-    /// </summary>
-    public async Task AddUserToProjectAsync(int projectId, int userId)
-    {
-        var project = await _dbSet.FindAsync(projectId) 
-            ?? throw new InvalidOperationException($"Проект с ID {projectId} не найден");
-                
-        var user = await _context.Users.FindAsync(userId)
-            ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
-
-        // Используем транзакцию для обеспечения целостности
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            if (project.Users == null)
-                project.Users = new List<User>();
-                
-            if (!project.Users.Any(u => u.Id == userId))
-            {
-                project.Users.Add(user);
-                await _context.SaveChangesAsync();
-            }
-            
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
+   
     
-    /// <summary>
-    /// Удалить пользователя из проекта
-    /// </summary>
-    public async Task RemoveUserFromProjectAsync(int projectId, int userId)
-    {
-        var project = await _dbSet
-            .Include(p => p.Users)
-            .FirstOrDefaultAsync(p => p.Id == projectId)
-            ?? throw new InvalidOperationException($"Проект с ID {projectId} не найден");
-
-        var user = project.Users?.FirstOrDefault(u => u.Id == userId)
-            ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден в проекте");
-
-        // Используем транзакцию для обеспечения целостности
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            project.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
-    
+   
     /// <summary>
     /// Удалить пользователя из проекта
     /// </summary>
@@ -140,6 +83,49 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         if (project != null)
         {
             _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+        }
+    }
+    
+    /// <summary>
+    /// Добавить пользователя в проект
+    /// </summary>
+    public async Task AddUserToProjectAsync(int projectId, int userId)
+    {
+        var project = await _dbSet
+            .Include(p => p.Users)
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+    
+        if (project == null)
+            throw new ArgumentException($"Проект с ID {projectId} не найден", nameof(projectId));
+    
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            throw new ArgumentException($"Пользователь с ID {userId} не найден", nameof(userId));
+    
+        if (!project.Users.Any(u => u.Id == userId))
+        {
+            project.Users.Add(user);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    /// <summary>
+    /// Удалить пользователя из проекта
+    /// </summary>
+    public async Task RemoveUserFromProjectAsync(int projectId, int userId)
+    {
+        var project = await _dbSet
+            .Include(p => p.Users)
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+    
+        if (project == null)
+            throw new ArgumentException($"Проект с ID {projectId} не найден", nameof(projectId));
+    
+        var user = project.Users.FirstOrDefault(u => u.Id == userId);
+        if (user != null)
+        {
+            project.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
     }
