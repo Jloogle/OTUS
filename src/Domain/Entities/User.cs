@@ -14,8 +14,8 @@ public class User
     public long? IdTelegram { get; set; }
     
     // Существующие связи
-    public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
+    public List<Project> Projects { get; set; } = new List<Project>();
     
     // Новая связь многие-ко-многим с задачами
-    public virtual ICollection<ProjTask> AssignedTasks { get; set; } = new List<ProjTask>();
+    public List<ProjTask> AssignedTasks { get; set; } = new List<ProjTask>();
 }

@@ -130,19 +130,30 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
 
     public async Task AssignTaskToUserAsync(int taskId, int userId)
     {
-        var task = await _dbSet
-            .Include(t => t.Project)
-            .Include(t => t.AssignedUsers)
-            .FirstOrDefaultAsync(t => t.Id == taskId)
-            ?? throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
+        using (ApplicationContext db = new ApplicationContext())
+        {
+            var user = await db.Users.FindAsync(userId); // проверяем, что пользователь существует
+            if (user == null)
+                throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
+            var task = await db.Tasks.FindAsync(taskId);
+            if (task == null)
+                throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
             
+            if (task.AssignedUsers.Contains(user))
+                throw new InvalidOperationException($"Задача с ID {taskId} уже назначена пользователю с ID {userId}");
+
+            task.AssignedUsers.Add(user);   
+            await db.SaveChangesAsync();
+            db.SaveChanges();
+        }
+
+        /*var task = await _dbSet.FindAsync(taskId);
+
         var user = await _context.Users.FindAsync(userId);
         if (user == null && userId != 0) // userId = 0 означает "снять назначение"
             throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
-            
-        if (task.Project == null)
-            throw new InvalidOperationException($"Задача с ID {taskId} не привязана к проекту");
-    
+
+
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
@@ -159,6 +170,8 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
                 if (!task.AssignedUsers.Any(u => u.Id == userId))
                 {
                     task.AssignedUsers.Add(user);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     message = $"Задача '{task.Name}' назначена пользователю {user.Name}";
                 }
                 else
@@ -166,32 +179,16 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
                     message = $"Задача '{task.Name}' уже назначена пользователю {user.Name}";
                 }
             }
-            
-            // Сохраняем изменения в задаче
-            _context.Tasks.Update(task);
-            
-            // Создаем уведомление о назначении задачи
-            var notification = new Notification
-            {
-                Name = "Назначение задачи",
-                Age = DateTime.UtcNow,
-                Description = message
-            };
-            
-            await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
-            
-            // Добавляем связь между уведомлением и задачей после сохранения
-            notification.Tasks.Add(task);
-            await _context.SaveChangesAsync();
-            
-            await transaction.CommitAsync();
+
+
+
+
         }
         catch
         {
             await transaction.RollbackAsync();
             throw;
-        }
+        }*/
     }
 
     public async Task DeleteTaskAsync(int taskId)
@@ -265,19 +262,18 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
     
     public async Task<IEnumerable<ProjTask>> GetAllTasksAsync()
     {
-        return await _dbSet.ToListAsync();
+        using (ApplicationContext db = new ApplicationContext())
+        {
+            return await db.Tasks.Include(t => t.Project).Include(t => t.AssignedUsers).ToListAsync();
+        }
     }
 
-    public async Task<IEnumerable<ProjTask>> GetTasksByUserIdAsync(long? IdTelegram)
+    public async Task<IEnumerable<ProjTask>> GetTasksByUserIdAsync(long? idTelegram)
     {
-        var user = await _context.Users
-            .Include(u => u.Projects)
-            .ThenInclude(p => p.ProjTasks)
-            .FirstOrDefaultAsync(u => u.IdTelegram == IdTelegram);
-        
-        if (user == null)
-            return new List<ProjTask>();
-        
-        return user.Projects.SelectMany(p => p.ProjTasks).ToList();
+        return await _context.Tasks
+            .Include(t => t.Project)
+            .Include(t => t.AssignedUsers)
+            .Where(t => t.AssignedUsers.Any(u => u.IdTelegram == idTelegram))
+            .ToListAsync();
     }
 }

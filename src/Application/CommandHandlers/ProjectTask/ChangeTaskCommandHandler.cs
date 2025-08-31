@@ -82,7 +82,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         }
 
         var taskList = string.Join("\n", allTasks.Select(t => 
-            $"ID: {t.Id}, Название: {t.Name}, Описание: {t.Description}, Назначен: {(t.AssignedUsers.FirstOrDefault()?.ToString() ?? "Не назначен")}"));
+            $"ID: {t.Id}, Название: {t.Name}, Описание: {t.Description}, Назначен: {(t.AssignedUsers.FirstOrDefault()?.Name!.ToString() ?? "Не назначен")}"));
         return $"Все задачи:\n{taskList}";
     }
 
