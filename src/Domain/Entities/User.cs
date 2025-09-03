@@ -18,4 +18,7 @@ public class User
     
     // Новая связь многие-ко-многим с задачами
     public List<ProjTask> AssignedTasks { get; set; } = new List<ProjTask>();
+
+    // Роли пользователя (многие-ко-многим)
+    public List<Role> Roles { get; set; } = new List<Role>();
 }

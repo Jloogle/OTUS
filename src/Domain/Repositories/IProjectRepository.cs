@@ -46,5 +46,10 @@ namespace Domain.Repositories
         public Task<int> AddProjectAsync(string name, DateTime deadline);
 
         public Task RemoveProjectAsync(int projectId);
+        
+        /// <summary>
+        /// Получить проекты пользователя
+        /// </summary>
+        Task<IEnumerable<Project>> GetUserProjectsAsync(int userId);
     }
 } 

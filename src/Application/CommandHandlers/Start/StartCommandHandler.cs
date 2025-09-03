@@ -3,7 +3,7 @@ using Domain.Commands;
 using Domain.Commands.Start;
 using Domain.Entities;
 using Domain.Repositories;
-using Stateless;
+using System.Text.RegularExpressions;
 
 namespace Application.CommandHandlers.Start;
 
@@ -23,107 +23,71 @@ public class StartCommandHandler : ICommandHandler<StartCommand>
     public async Task<string?> Handle(StartCommand? command)
     {
         _command = command;
+        var input = _command!.UserCommand;
+        var isJustCommand = string.Equals(input, _command!.Command, StringComparison.OrdinalIgnoreCase);
 
-        var user = await _userRepository.FindByIdTelegram(command!.UserId);
-        
-        if (user != null)
-            return $"Вы уже зарегистрированы!\nВаше имя: {user.Name}";
-        
-        var userRedis = GetTempUser(_command!.UserId);
-        
-        var stateMachine = ConfigStateMachine(userRedis.State);
-        stateMachine.Fire(TrafficTrigger.Go);
-            
-        return _answer;
-    }
+        // Уже зарегистрирован в БД?
+        var existing = await _userRepository.FindByIdTelegram(_command!.UserId);
+        if (existing != null)
+            return $"Вы уже зарегистрированы!\nВаше имя: {existing.Name}";
 
-    private StateMachine<TrafficState, TrafficTrigger> ConfigStateMachine(int state)
-    {
-        var stateMachine = new StateMachine<TrafficState, TrafficTrigger>((TrafficState)state);
-
-        stateMachine.Configure(TrafficState.New)
-            .Permit(TrafficTrigger.Go, TrafficState.Name);
-
-        stateMachine.Configure(TrafficState.Name)
-            .OnEntry(HandleNameState)
-            .Permit(TrafficTrigger.Go, TrafficState.Email);
-        
-        stateMachine.Configure(TrafficState.Email)
-            .OnEntry(HandleEmailState)
-            .Permit(TrafficTrigger.Go, TrafficState.Phone);
-        
-        stateMachine.Configure(TrafficState.Phone)
-            .OnEntry(HandlePhoneState)
-            .Permit(TrafficTrigger.Go, TrafficState.Age);
-        
-        stateMachine.Configure(TrafficState.Age)
-            .OnEntry(HandleAgeState)
-            .Permit(TrafficTrigger.Go, TrafficState.Finished);
-        
-        stateMachine.Configure(TrafficState.Finished)
-            .OnEntry(HandleFinishedState)
-            .Permit(TrafficTrigger.Go, TrafficState.New);
-        
-        return stateMachine;
-    }
-
-    private void HandleNameState()
-    {
         var user = GetTempUser(_command!.UserId);
         user.IdTelegram = _command!.UserId;
-        user.State = (int)TrafficState.Name;
-        if (_command!.UserCommand != _command!.Command)
-            user.Name = _command!.UserCommand!;
-        _answer = "Добро пожаловать!\nНеобходимо пройти процедуру регистрации!\nВведите ваше имя:";
-        SaveUserToRedis(user);
-    }
 
-    private void HandleEmailState()
-    {
-        var user = GetTempUser(_command!.UserId);
-        if (_command!.UserCommand != _command!.Command)
-            user.Name = _command!.UserCommand!;
-        user.State = (int)TrafficState.Email;
-        SaveUserToRedis(user);
-        _answer = "Введите Email:";
-    }
-
-    private void HandlePhoneState()
-    {
-        var user = GetTempUser(_command!.UserId);
-        if (_command!.UserCommand != _command!.Command)
-            user.Email = _command!.UserCommand!;
-        user.State = (int)TrafficState.Phone;
-        SaveUserToRedis(user);
-        _answer = "Введите телефон:";
-    }
-
-    private void HandleAgeState()
-    {
-        var user = GetTempUser(_command!.UserId);
-        if (_command!.UserCommand != _command!.Command)
-            user.PhoneNumber = _command!.UserCommand!;
-        user.State = (int)TrafficState.Age;
-        SaveUserToRedis(user);
-        _answer = "Введите ваш возраст:";
-    }
-
-    private async void HandleFinishedState()
-    {
-        var user = GetTempUser(_command!.UserId);
-        try
+        // Если пришла только команда (/start) или состояние не задано — показываем первый вопрос
+        if (isJustCommand || user.State == (int)TrafficState.New)
         {
-            if (_command!.UserCommand != _command!.Command)
-                user.Age = int.Parse(_command!.UserCommand!);
-            
-            user.State = (int)TrafficState.Finished;
-            _answer = "Вы успешно зарегистрировались!";
+            user.State = (int)TrafficState.Name;
             SaveUserToRedis(user);
-            await _userRepository.AddUser(user);
+            return "Добро пожаловать!\nНеобходимо пройти процедуру регистрации!\nВведите ваше имя:";
         }
-        catch (Exception)
+
+        switch ((TrafficState)user.State)
         {
-            _answer = "Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.";
+            case TrafficState.Name:
+                user.Name = input;
+                user.State = (int)TrafficState.Email;
+                SaveUserToRedis(user);
+                return "Введите Email:";
+
+            case TrafficState.Email:
+                user.Email = input;
+                user.State = (int)TrafficState.Phone;
+                SaveUserToRedis(user);
+                return "Введите телефон:";
+
+            case TrafficState.Phone:
+                user.PhoneNumber = input;
+                user.State = (int)TrafficState.Age;
+                SaveUserToRedis(user);
+                return "Введите ваш возраст:";
+
+            case TrafficState.Age:
+                if (!int.TryParse(input, out var age) || age <= 0 || age > 120)
+                {
+                    return "Возраст должен быть числом от 1 до 120. Введите ваш возраст:";
+                }
+                user.Age = age;
+                user.State = (int)TrafficState.Finished;
+                SaveUserToRedis(user);
+                try
+                {
+                    await _userRepository.AddUser(user);
+                    _radisRepository.StringDelete("Reg: " + _command!.UserId);
+                    return "Вы успешно зарегистрировались!";
+                }
+                catch
+                {
+                    return "Произошла ошибка при регистрации. Пожалуйста, попробуйте снова.";
+                }
+
+            case TrafficState.Finished:
+                _radisRepository.StringDelete("Reg: " + _command!.UserId);
+                return "Вы уже завершили регистрацию. Используйте /profile для просмотра данных.";
+            default:
+                user.State = (int)TrafficState.Name;
+                SaveUserToRedis(user);
+                return "Введите ваше имя:";
         }
     }
 

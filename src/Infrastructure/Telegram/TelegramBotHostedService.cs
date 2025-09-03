@@ -5,6 +5,7 @@ using Domain.Commands.Profile;
 using Domain.Commands.Project;
 using Domain.Commands.Start;
 using Domain.Commands.Task;
+using Domain.Commands.Back;
 using Domain.Constants;
 using Infrastructure.Configuration.Telegram;
 using Microsoft.Extensions.Hosting;
@@ -17,10 +18,11 @@ namespace Infrastructure.Telegram;
 
 public class TelegramBotHostedService(
     ITelegramSettings telegramSettings,
-    ICommandRouting commandRouter)
+    ICommandRouting commandRouter,
+    ITelegramBotClient botClient)
     : BackgroundService
 {
-    private readonly ITelegramBotClient _botClient = new TelegramBotClient(telegramSettings.Token);
+    private readonly ITelegramBotClient _botClient = botClient;
     private static readonly ConcurrentDictionary<int, ICommand> LastCommands = new();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -70,9 +72,10 @@ public class TelegramBotHostedService(
                {
                    Keyboard =
                    [
-                       [new KeyboardButton(BotCommands.AddProject), new KeyboardButton(BotCommands.ListMyProjects)],
-                       [new KeyboardButton(BotCommands.ListMyTasks), new KeyboardButton(BotCommands.ChangeTask)],
-                       [new KeyboardButton(BotCommands.Back), new KeyboardButton(BotCommands.ProjectDelete)]
+                   [new KeyboardButton(BotCommands.AddProject), new KeyboardButton(BotCommands.ListMyProjects)],
+                   [new KeyboardButton(BotCommands.ListMyTasks), new KeyboardButton(BotCommands.ChangeTask)],
+                   [new KeyboardButton(BotCommands.ListInvites), new KeyboardButton(BotCommands.InviteHistory)],
+                   [new KeyboardButton(BotCommands.Back), new KeyboardButton(BotCommands.ProjectDelete)]
                    ],
                    ResizeKeyboard = true
                };
@@ -105,9 +108,21 @@ public class TelegramBotHostedService(
              trigger = LastCommands.FirstOrDefault(x => x.Key == (int)update.Message.Chat.Id).Value.Command.ToString();
         }
 
+        // alias mapping
+        if (trigger == BotCommands.Register)
+        {
+            trigger = BotCommands.Start;
+        }
+        // Убрали алиас /project_create
+
         return trigger switch
         {
             BotCommands.Start => new StartCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.Register => new StartCommand
             {
                 UserId = update.Message.From?.Id,
                 UserCommand = update.Message.Text
@@ -142,6 +157,40 @@ public class TelegramBotHostedService(
             {
                 UserId = update.Message.From?.Id,
                 UserCommand = update.Message.Text
+            },
+            BotCommands.TaskCreate => new TaskCreateCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.ProjectInvite => new InviteProjectMemberCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.AcceptInvite => new AcceptInviteCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.DeclineInvite => new DeclineInviteCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.ListInvites => new ListInvitesCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.InviteHistory => new InviteHistoryCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.Back => new BackCommand
+            {
+                UserId = update.Message.From?.Id
             },
             _ => null
         };

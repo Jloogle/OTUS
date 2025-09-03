@@ -6,4 +6,5 @@ public interface IRadisRepository
 {
     public void StringSet (string key, string value);
     public string StringGet (string key);
+    public void StringDelete(string key);
 }

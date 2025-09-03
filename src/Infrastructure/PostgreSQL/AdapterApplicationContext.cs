@@ -2,5 +2,8 @@ namespace Infrastructure.PostgreSQL;
 
 public class AdapterApplicationContext : IAdapterApplicationContext
 {
-    public ApplicationContext getContext() => new ApplicationContext();
+    // Cache a single ApplicationContext instance per adapter lifetime
+    private readonly ApplicationContext _ctx = new ApplicationContext();
+
+    public ApplicationContext getContext() => _ctx;
 }

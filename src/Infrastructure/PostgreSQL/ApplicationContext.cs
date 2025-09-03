@@ -18,19 +18,23 @@ public sealed class ApplicationContext  : DbContext
 
     public ApplicationContext()
     {
-        //Database.EnsureDeleted();
-        //Database.EnsureCreated();
+        // Do not run migrations here; it breaks design-time tools
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        
         var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}.json", optional: true)
-            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddEnvironmentVariables()
             .Build();
         
-        optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+        var cs = config.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(cs))
+        {
+            cs = "Host=localhost;Port=5432;Database=postgres_db;Username=postgres;Password=postgres";
+        }
+        optionsBuilder.UseNpgsql(cs);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

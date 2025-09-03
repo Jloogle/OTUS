@@ -8,4 +8,5 @@ public class RadisRepositoty(IAdapterMultiplexer adapterMultiplexer) : IRadisRep
 {
     public void StringSet (string key, string value) => adapterMultiplexer.getMultiplexer().GetDatabase().StringSet(key, value);
     public string StringGet (string key) => adapterMultiplexer.getMultiplexer().GetDatabase().StringGet(key).ToString();
+    public void StringDelete(string key) => adapterMultiplexer.getMultiplexer().GetDatabase().KeyDelete(key);
 }

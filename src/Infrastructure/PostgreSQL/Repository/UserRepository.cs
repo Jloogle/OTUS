@@ -22,9 +22,15 @@ namespace Infrastructure.PostgreSQL.Repository
             return await _dbSet.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string roleName)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(roleName))
+                throw new ArgumentException("Название роли не может быть пустым", nameof(roleName));
+
+            return await _dbSet
+                .Include(u => u.Roles)
+                .Where(u => u.Roles.Any(r => r.Name == roleName))
+                .ToListAsync();
         }
 
 
@@ -40,20 +46,38 @@ namespace Infrastructure.PostgreSQL.Repository
             return user.Projects ?? new List<Project?>();
         }
 
-        public Task AddRoleToUserAsync(int userId, int roleId)
+        public async Task AddRoleToUserAsync(int userId, int roleId)
         {
-            throw new NotImplementedException();
+            var user = await _dbSet.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == userId)
+                       ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
+
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId)
+                       ?? throw new InvalidOperationException($"Роль с ID {roleId} не найдена");
+
+            if (user.Roles.All(r => r.Id != roleId))
+            {
+                user.Roles.Add(role);
+                await _context.SaveChangesAsync();
+            }
         }
 
-        public Task RemoveRoleFromUserAsync(int userId, int roleId)
+        public async Task RemoveRoleFromUserAsync(int userId, int roleId)
         {
-            throw new NotImplementedException();
+            var user = await _dbSet.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == userId)
+                       ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
+
+            var role = user.Roles.FirstOrDefault(r => r.Id == roleId);
+            if (role != null)
+            {
+                user.Roles.Remove(role);
+                await _context.SaveChangesAsync();
+            }
         }
 
 
         public async Task AddUser(User user)
         {
-            _context.Users.AddRange(user);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
         }
         
@@ -63,6 +87,17 @@ namespace Infrastructure.PostgreSQL.Repository
                 throw new ArgumentException("Telegram ID не может быть пустым", nameof(id));
                 
             return (await _dbSet.FirstOrDefaultAsync(u => u.IdTelegram == id))!;
+        }
+
+        public async Task<User?> FindByIdTelegramWithDetails(long? id)
+        {
+            if (id == null)
+                throw new ArgumentException("Telegram ID не может быть пустым", nameof(id));
+
+            return await _dbSet
+                .Include(u => u.Roles)
+                .Include(u => u.Projects)
+                .FirstOrDefaultAsync(u => u.IdTelegram == id);
         }
     }
 } 

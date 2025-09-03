@@ -17,8 +17,9 @@ namespace Infrastructure.PostgreSQL.Repository
 
         protected BaseRepository(IAdapterApplicationContext context, ILogger<BaseRepository<T>> logger = null)
         {
+            // Ensure a single DbContext instance is used for both _context and _dbSet
             _context = context.getContext() ?? throw new ArgumentNullException(nameof(context));
-            _dbSet = context.getContext().Set<T>();
+            _dbSet = _context.Set<T>();
             _logger = logger;
         }
 

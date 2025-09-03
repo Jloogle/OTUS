@@ -48,5 +48,10 @@ namespace Domain.Repositories
         /// <param name="id"></param>
         /// <returns></returns>
         public Task<User> FindByIdTelegram(long? id);
+
+        /// <summary>
+        /// Найти пользователя по Telegram Id с загрузкой ролей и проектов
+        /// </summary>
+        Task<User?> FindByIdTelegramWithDetails(long? id);
     }
 } 

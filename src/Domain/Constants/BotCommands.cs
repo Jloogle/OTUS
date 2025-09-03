@@ -8,6 +8,8 @@ public static class BotCommands
 {
     [Commands("В начало.")]
     public const string Start = "/start";
+    [Commands("Регистрация пользователя (алиас /start).")]
+    public const string Register = "/register";
     [Commands("Просмотр своих данных.")]
     public const string Profile = "/profile";
     [Commands("Help по функциям.")]
@@ -16,8 +18,9 @@ public static class BotCommands
     public const string Project = "/project";
     [Commands("Удаление проекта - /project_delete [Id проекта].")]
     public const string ProjectDelete = "/project_delete";
-    [Commands("Создание проекта - /add_project [название проекта] [описание] [исполнитель] [дедлайн].")]
+    [Commands("Создание проекта - /add_project [название проекта] [дедлайн].")]
     public const string AddProject = "/add_project";
+    // Убрали алиас /project_create во избежание дублирования с /add_project
     [Commands("Вернуться в начало.")]
     public const string Back = "/back";
     [Commands("Показать мои проекты.")]
@@ -26,6 +29,19 @@ public static class BotCommands
     public const string ListMyTasks = "/list_my_tasks";
     [Commands("Добавить или изменить задачу.")]
     public const string ChangeTask = "/change_task";
+    [Commands("Создание задачи - /task_create [название] [описание] [ID проекта].")]
+    public const string TaskCreate = "/task_create";
+    [Commands("Пригласить в проект - /project_invite [ID проекта] [email] [роль?].")]
+    public const string ProjectInvite = "/project_invite";
+
+    [Commands("Принять приглашение в проект - /accept_invite [ID приглашения]")]
+    public const string AcceptInvite = "/accept_invite";
+    [Commands("Отклонить приглашение в проект - /decline_invite [ID приглашения]")]
+    public const string DeclineInvite = "/decline_invite";
+
+    // Invites listing
+    public const string ListInvites = "/invites";
+    public const string InviteHistory = "/invite_history";
     
 
 
@@ -67,4 +83,3 @@ public static class BotCommands
     }
     
 }
-

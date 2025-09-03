@@ -3,6 +3,7 @@ using Infrastructure.PostgreSQL;
 using Infrastructure.PostgreSQL.Repository;
 using Infrastructure.Redis.Repository;
 using Microsoft.Extensions.DependencyInjection;
+using Domain.Services;
 
 namespace Infrastructure.Extensions
 {
@@ -21,6 +22,8 @@ namespace Infrastructure.Extensions
             services.AddTransient<ITaskRepository, TaskRepository>();
             services.AddTransient<IAdapterMultiplexer, AdapterMultiplexer>();
             services.AddTransient<IRadisRepository, RadisRepositoty>();
+            services.AddSingleton<IInviteStore, InviteStore>();
+            services.AddTransient<IRoleRepository, RoleRepository>();
 
 
 

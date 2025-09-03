@@ -2,6 +2,7 @@ using Infrastructure.Configuration.Telegram;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Telegram.Bot;
 
 namespace Infrastructure.Extensions;
 
@@ -14,5 +15,11 @@ public static class ServiceInfrastructureCollectionExtensions
 
         services
             .AddSingleton<ITelegramSettings>(sp => sp.GetRequiredService<IOptions<TelegramSettings>>().Value);
+
+        services.AddSingleton<ITelegramBotClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<ITelegramSettings>();
+            return new TelegramBotClient(settings.Token);
+        });
     }
 }
