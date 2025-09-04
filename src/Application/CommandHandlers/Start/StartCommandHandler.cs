@@ -3,7 +3,6 @@ using Domain.Commands;
 using Domain.Commands.Start;
 using Domain.Entities;
 using Domain.Repositories;
-using System.Text.RegularExpressions;
 
 namespace Application.CommandHandlers.Start;
 

@@ -73,9 +73,9 @@ public class TelegramBotHostedService(
                    Keyboard =
                    [
                    [new KeyboardButton(BotCommands.AddProject), new KeyboardButton(BotCommands.ListMyProjects)],
-                   [new KeyboardButton(BotCommands.ListMyTasks), new KeyboardButton(BotCommands.ChangeTask)],
+                   [new KeyboardButton(BotCommands.ProjectDelete), new KeyboardButton(BotCommands.ChangeTask)],
                    [new KeyboardButton(BotCommands.ListInvites), new KeyboardButton(BotCommands.InviteHistory)],
-                   [new KeyboardButton(BotCommands.Back), new KeyboardButton(BotCommands.ProjectDelete)]
+                   [new KeyboardButton(BotCommands.Back)]
                    ],
                    ResizeKeyboard = true
                };
