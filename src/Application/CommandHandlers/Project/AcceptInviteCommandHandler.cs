@@ -7,6 +7,9 @@ using Domain.Services;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Принимает активное приглашение в проект и при необходимости назначает роль пользователю.
+/// </summary>
 public class AcceptInviteCommandHandler(
     IInviteStore inviteStore,
     IProjectRepository projectRepository,
@@ -14,6 +17,9 @@ public class AcceptInviteCommandHandler(
     IRoleRepository roleRepository
 ) : ICommandHandler<AcceptInviteCommand>
 {
+    /// <summary>
+    /// Проверяет принадлежность приглашения, добавляет пользователя в проект, назначает роль и удаляет приглашение.
+    /// </summary>
     public async Task<string?> Handle(AcceptInviteCommand command)
     {
         var id = ParseId(command.UserCommand);
@@ -42,6 +48,9 @@ public class AcceptInviteCommandHandler(
         return $"Вы добавлены в проект {invite.ProjectId}.";
     }
 
+    /// <summary>
+    /// Извлекает ID приглашения из текста команды вида: "/accept_invite [123]".
+    /// </summary>
     private static int? ParseId(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return null;
@@ -53,4 +62,3 @@ public class AcceptInviteCommandHandler(
         return cleaned;
     }
 }
-

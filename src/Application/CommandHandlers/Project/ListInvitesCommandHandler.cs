@@ -5,8 +5,14 @@ using Domain.Services;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Показывает активные приглашения для текущего пользователя.
+/// </summary>
 public class ListInvitesCommandHandler(IInviteStore inviteStore) : ICommandHandler<ListInvitesCommand>
 {
+    /// <summary>
+    /// Получает приглашения и формирует действия для принятия/отклонения.
+    /// </summary>
     public async Task<string?> Handle(ListInvitesCommand command)
     {
         if (command.UserId is null)
@@ -26,4 +32,3 @@ public class ListInvitesCommandHandler(IInviteStore inviteStore) : ICommandHandl
         return sb.ToString();
     }
 }
-

@@ -4,12 +4,13 @@ using Domain.Repositories;
 using System.Text.Json;
 using Domain.Services;
 using Telegram.Bot;
-using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Обрабатывает команду создания проекта и проводит пошаговую процедуру создания.
+/// </summary>
 public class AddProjectCommandHandler(
     IProjectRepository projectRepository,
     IRadisRepository redis,
@@ -18,6 +19,9 @@ public class AddProjectCommandHandler(
     ITelegramBotClient bot
 ) : ICommandHandler<AddProjectCommand>
 {
+    /// <summary>
+    /// Обрабатывает команду создания проекта и проводит пошаговую процедуру создания.
+    /// </summary>
     public async Task<string?> Handle(AddProjectCommand command)
     {
         var key = $"ProjCreate:{command.UserId}";
@@ -119,7 +123,7 @@ public class AddProjectCommandHandler(
                 return "Создание проекта. Введите название проекта:";
         }
     }
-    
+
     private static DateTime? ConvertToDateTime(string value)
     {
         DateTime convertedDate;

@@ -9,6 +9,9 @@ public class ListProjectCommandHandler(
     IUserRepository userRepository
 ) : ICommandHandler<ListProjectCommand>
 {
+    /// <summary>
+    /// Выводит список проектов текущего пользователя и контекстные команды бота.
+    /// </summary>
     public async Task<string?> Handle(ListProjectCommand command)
     {
         if (command.UserId == null)
@@ -23,9 +26,9 @@ public class ListProjectCommandHandler(
 
         // Получить проекты пользователя
         var projects = await projectRepository.GetUserProjectsAsync(user.Id);
-        
+
         Console.WriteLine($"Найдено проектов: {projects?.Count() ?? 0}");
-        
+
         if (projects == null || !projects.Any())
             return "У вас пока нет проектов. Создайте проект командой /add_project";
 
@@ -33,7 +36,7 @@ public class ListProjectCommandHandler(
         result.AppendLine("📋 ВАШИ ПРОЕКТЫ:");
         result.AppendLine(new string('=', 50));
         result.AppendLine();
-        
+
         foreach (var project in projects)
         {
             result.AppendLine($"🆔 ID: {project.Id}");
@@ -48,12 +51,12 @@ public class ListProjectCommandHandler(
             result.AppendLine(new string('-', 50));
             result.AppendLine();
         }
-        
+
         result.AppendLine("📌 ДОПОЛНИТЕЛЬНЫЕ КОМАНДЫ:");
         result.AppendLine($"   • Создать новый проект: {BotCommands.AddProject}");
         result.AppendLine($"   • Мои задачи: {BotCommands.ListMyTasks}");
         result.AppendLine($"   • В начало: {BotCommands.Start}");
-        
+
         return result.ToString();
     }
 }

@@ -5,8 +5,14 @@ using Domain.Services;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Обрабатывает команду отклонения приглашения в проект.
+/// </summary>
 public class DeclineInviteCommandHandler(IInviteStore inviteStore) : ICommandHandler<DeclineInviteCommand>
 {
+    /// <summary>
+    /// Обрабатывает команду отклонения приглашения в проект.
+    /// </summary>
     public async Task<string?> Handle(DeclineInviteCommand command)
     {
         var id = ParseId(command.UserCommand);
@@ -26,4 +32,3 @@ public class DeclineInviteCommandHandler(IInviteStore inviteStore) : ICommandHan
         return int.TryParse(m.Groups[1].Value.Trim(), out var id) ? id : null;
     }
 }
-

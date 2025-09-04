@@ -7,8 +7,14 @@ using Domain.Services;
 
 namespace Infrastructure.Extensions
 {
+    /// <summary>
+    /// Регистрирует репозитории и адаптеры для БД и Redis.
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Добавляет основные инфраструктурные зависимости в контейнер DI.
+        /// </summary>
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             // Регистрация контекста базы данных

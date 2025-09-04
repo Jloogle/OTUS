@@ -1,8 +1,9 @@
 using Application.Extensions;
+using Hangfire;
 using Infrastructure.Extensions;
 using Infrastructure.Telegram;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}.json", optional: true);
@@ -12,5 +13,9 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<TelegramBotHostedService>();
 
-var host = builder.Build();
-host.Run();
+var app = builder.Build();
+
+// Hangfire Dashboard at /hangfire
+app.MapHangfireDashboard("/hangfire");
+
+app.Run();

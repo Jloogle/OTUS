@@ -4,8 +4,14 @@ using Domain.Repositories;
 
 namespace Application.CommandHandlers.Profile;
 
+/// <summary>
+/// Показывает текущий профиль пользователя с ролями и проектами.
+/// </summary>
 public class ProfileCommandHandler(IUserRepository userRepository) : ICommandHandler<ProfileCommand>
 {
+    /// <summary>
+    /// Получает пользователя по Telegram id и форматирует профиль для отображения.
+    /// </summary>
     public async Task<string?> Handle(ProfileCommand command)
     {
         if (command.UserId is null)

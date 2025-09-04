@@ -6,8 +6,14 @@ using Domain.Repositories;
 
 namespace Application.CommandHandlers.ProjectTask;
 
+/// <summary>
+/// Создаёт новую задачу в проекте по команде бота.
+/// </summary>
 public class TaskCreateCommandHandler(ITaskRepository taskRepository) : ICommandHandler<TaskCreateCommand>
 {
+    /// <summary>
+    /// Разбирает параметры, создаёт задачу и возвращает подтверждение.
+    /// </summary>
     public async Task<string?> Handle(TaskCreateCommand command)
     {
         var parts = Parse(command.UserCommand);
@@ -24,6 +30,9 @@ public class TaskCreateCommandHandler(ITaskRepository taskRepository) : ICommand
 
     private static string Help() => "Создание задачи: /task_create [название] [описание] [ID проекта]";
 
+    /// <summary>
+    /// Извлекает параметры из ввода в квадратных скобках.
+    /// </summary>
     private static string[] Parse(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return Array.Empty<string>();
@@ -32,4 +41,3 @@ public class TaskCreateCommandHandler(ITaskRepository taskRepository) : ICommand
         return matches.Select(m => m.Groups[1].Value.Trim()).ToArray();
     }
 }
-

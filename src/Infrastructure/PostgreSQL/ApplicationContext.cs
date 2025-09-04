@@ -7,12 +7,20 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.PostgreSQL;
 
+/// <summary>
+/// DbContext Entity Framework Core с провайдером PostgreSQL и схемой OTUS.
+/// </summary>
 public sealed class ApplicationContext  : DbContext
 {
+    /// <summary>Набор пользователей.</summary>
     public DbSet<User> Users { get; set; }
+    /// <summary>Набор уведомлений.</summary>
     public DbSet<Notification> Notifications { get; set; }
+    /// <summary>Набор ролей.</summary>
     public DbSet<Role> Roles { get; set; }
+    /// <summary>Набор задач.</summary>
     public DbSet<ProjTask> Tasks { get; set; }
+    /// <summary>Набор проектов.</summary>
     public DbSet<Project?> Projects { get; set; }
   
 
@@ -20,6 +28,9 @@ public sealed class ApplicationContext  : DbContext
     {
         // Do not run migrations here; it breaks design-time tools
     }
+    /// <summary>
+    /// Настраивает DbContext, получая строку подключения из appsettings или используя значения по умолчанию.
+    /// </summary>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var config = new ConfigurationBuilder()
@@ -37,6 +48,9 @@ public sealed class ApplicationContext  : DbContext
         optionsBuilder.UseNpgsql(cs);
     }
 
+    /// <summary>
+    /// Применяет конфигурации сущностей и сопоставления связей.
+    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

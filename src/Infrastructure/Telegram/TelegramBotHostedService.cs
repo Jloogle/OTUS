@@ -16,6 +16,9 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 namespace Infrastructure.Telegram;
 
+/// <summary>
+/// Фоновый сервис, запускающий long polling Telegram-бота и маршрутизацию входящих команд.
+/// </summary>
 public class TelegramBotHostedService(
     ITelegramSettings telegramSettings,
     ICommandRouting commandRouter,
@@ -25,6 +28,7 @@ public class TelegramBotHostedService(
     private readonly ITelegramBotClient _botClient = botClient;
     private static readonly ConcurrentDictionary<int, ICommand> LastCommands = new();
 
+    /// <inheritdoc />
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var cancellationTokenSource = new CancellationTokenSource();
@@ -37,6 +41,9 @@ public class TelegramBotHostedService(
         await Task.CompletedTask;
     }
     
+    /// <summary>
+    /// Обрабатывает входящие обновления Telegram и маршрутизирует команды.
+    /// </summary>
     private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Message is { Text: not null } message)
@@ -63,6 +70,9 @@ public class TelegramBotHostedService(
         }
     }
     
+    /// <summary>
+    /// Формирует клавиатуру в зависимости от текущего контекста команды.
+    /// </summary>
     private ReplyKeyboardMarkup RouterKeyboard(string? command)
     {
         ReplyKeyboardMarkup replyMarkup;
@@ -96,6 +106,10 @@ public class TelegramBotHostedService(
         return replyMarkup;
     }
     
+    /// <summary>
+    /// Преобразует текст в экземпляр команды; поддерживает состояние,
+    /// когда пользователь присылает текст без слэша — подставляется последняя команда.
+    /// </summary>
     private static ICommand? ParseCommand(Update update)
     {
         if (update.Message?.Text is null) return null;

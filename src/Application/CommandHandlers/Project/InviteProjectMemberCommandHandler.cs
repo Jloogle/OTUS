@@ -7,6 +7,9 @@ using Telegram.Bot;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Обрабатывает приглашение пользователя в проект и отправляет действия Telegram для принятия/отклонения.
+/// </summary>
 public class InviteProjectMemberCommandHandler(
     IProjectRepository projectRepository,
     IUserRepository userRepository,
@@ -15,6 +18,9 @@ public class InviteProjectMemberCommandHandler(
     ITelegramBotClient bot
 ) : ICommandHandler<InviteProjectMemberCommand>
 {
+    /// <summary>
+    /// Разбирает ввод, создаёт приглашение в хранилище и уведомляет приглашённого.
+    /// </summary>
     public async Task<string?> Handle(InviteProjectMemberCommand command)
     {
         var parts = Parse(command.UserCommand);
@@ -51,6 +57,9 @@ public class InviteProjectMemberCommandHandler(
         return $"Приглашение отправлено пользователю {user.Email}. ID приглашения: {inviteId}.";
     }
 
+    /// <summary>
+    /// Разбор текста команды: извлекает параметры внутри квадратных скобок.
+    /// </summary>
     private static string[] Parse(string? input)
     {
         if (string.IsNullOrWhiteSpace(input)) return [];

@@ -5,8 +5,14 @@ using Domain.Services;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Показывает меню проектов и краткую сводку по приглашениям пользователя.
+/// </summary>
 public class ProjectCommandHandler(IInviteStore inviteStore) : ICommandHandler<ProjectCommand>
 {
+    /// <summary>
+    /// Формирует меню и, при наличии, выводит несколько приглашений с действиями.
+    /// </summary>
     public async Task<string?> Handle(ProjectCommand command)
     {
         var sb = new StringBuilder();

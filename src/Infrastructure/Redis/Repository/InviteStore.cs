@@ -4,12 +4,23 @@ using Infrastructure.PostgreSQL;
 
 namespace Infrastructure.Redis.Repository;
 
+/// <summary>
+/// Репозиторий для работы с приглашениями в проекты.
+/// </summary>
 public class InviteStore(IAdapterMultiplexer adapterMultiplexer) : IInviteStore
 {
     private readonly string CounterKey = "Invite:Counter";
     private static string InviteKey(int id) => $"Invite:{id}";
     private static string InviteeIndexKey(long tgId) => $"InviteIndex:Invitee:{tgId}";
 
+    /// <summary>
+    /// Создать новое приглашение.
+    /// </summary>
+    /// <param name="projectId">Идентификатор проекта.</param>
+    /// <param name="inviterTgId">Идентификатор Telegram отправителя.</param>
+    /// <param name="inviteeTgId">Идентификатор Telegram получателя.</param>
+    /// <param name="roleName">Роль получателя.</param>
+    /// <returns>Идентификатор приглашения.</returns>
     public async Task<int> CreateAsync(int projectId, long inviterTgId, long inviteeTgId, string? roleName)
     {
         var db = adapterMultiplexer.getMultiplexer().GetDatabase();
@@ -20,6 +31,11 @@ public class InviteStore(IAdapterMultiplexer adapterMultiplexer) : IInviteStore
         return newId;
     }
 
+    /// <summary>
+    /// Получить приглашение по идентификатору.
+    /// </summary>
+    /// <param name="inviteId">Идентификатор приглашения.</param>
+    /// <returns>Приглашение или null, если не найдено.</returns>
     public async Task<ProjectInvite?> GetAsync(int inviteId)
     {
         var db = adapterMultiplexer.getMultiplexer().GetDatabase();
@@ -28,6 +44,10 @@ public class InviteStore(IAdapterMultiplexer adapterMultiplexer) : IInviteStore
         return JsonSerializer.Deserialize<ProjectInvite>(val!);
     }
 
+    /// <summary>
+    /// Удалить приглашение по идентификатору.
+    /// </summary>
+    /// <param name="inviteId">Идентификатор приглашения.</param>
     public async Task RemoveAsync(int inviteId)
     {
         var db = adapterMultiplexer.getMultiplexer().GetDatabase();
@@ -44,6 +64,11 @@ public class InviteStore(IAdapterMultiplexer adapterMultiplexer) : IInviteStore
         await db.KeyDeleteAsync(key);
     }
 
+    /// <summary>
+    /// Получить список активных приглашений для указанного получателя.
+    /// </summary>
+    /// <param name="inviteeTelegramId">Идентификатор Telegram получателя.</param>
+    /// <returns>Список активных приглашений.</returns>
     public async Task<IEnumerable<ProjectInvite>> ListActiveForInviteeAsync(long inviteeTelegramId)
     {
         var db = adapterMultiplexer.getMultiplexer().GetDatabase();

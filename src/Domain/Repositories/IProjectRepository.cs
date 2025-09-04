@@ -10,46 +10,62 @@ namespace Domain.Repositories
     public interface IProjectRepository : IRepository<Project>
     {
         /// <summary>
-        /// Найти проект по названию
+        /// Найти проект по названию.
         /// </summary>
+        /// <param name="name">Название проекта для поиска.</param>
+        /// <returns>Найденный проект или null, если не найден.</returns>
         Task<Project> FindByNameAsync(string name);
-        
+
         /// <summary>
-        /// Получить задачи проекта
+        /// Получить все задачи проекта.
         /// </summary>
+        /// <param name="projectId">Идентификатор проекта.</param>
+        /// <returns>Список задач проекта.</returns>
         Task<IEnumerable<ProjTask>> GetProjectTasksAsync(int projectId);
-        
+
         /// <summary>
-        /// Получить участников проекта
+        /// Получить всех участников проекта.
         /// </summary>
+        /// <param name="projectId">Идентификатор проекта.</param>
+        /// <returns>Список участников проекта.</returns>
         Task<IEnumerable<User>> GetProjectMembersAsync(int projectId);
-        
+
         /// <summary>
-        /// Добавить пользователя к проекту
+        /// Добавить пользователя к проекту.
         /// </summary>
+        /// <param name="projectId">Идентификатор проекта.</param>
+        /// <param name="userId">Идентификатор пользователя.</param>
         Task AddUserToProjectAsync(int projectId, int userId);
-        
+
         /// <summary>
-        /// Удалить пользователя из проекта
+        /// Удалить пользователя из проекта.
         /// </summary>
+        /// <param name="projectId">Идентификатор проекта.</param>
+        /// <param name="userId">Идентификатор пользователя.</param>
         Task RemoveUserFromProjectAsync(int projectId, int userId);
 
         /// <summary>
-        /// Asynchronously adds a new project to the database.
+        /// Асинхронно добавляет новый проект в базу данных.
         /// </summary>
-        /// <param name="name">The name of the project to be added. Must not be null or empty.</param>
-        /// <param name="deadline">The deadline for the project completion.</param>
+        /// <param name="name">Название проекта для добавления. Не должно быть null или пустым.</param>
+        /// <param name="deadline">Дедлайн завершения проекта.</param>
         /// <returns>
-        /// A task that represents the asynchronous operation. The task result contains
-        /// the number of state entries written to the database.
+        /// Задача, представляющая асинхронную операцию. Результат задачи содержит
+        /// количество записей состояния, записанных в базу данных.
         /// </returns>
         public Task<int> AddProjectAsync(string name, DateTime deadline);
 
-        public Task RemoveProjectAsync(int projectId);
-        
         /// <summary>
-        /// Получить проекты пользователя
+        /// Удаляет проект по идентификатору.
         /// </summary>
+        /// <param name="projectId">Идентификатор проекта для удаления.</param>
+        public Task RemoveProjectAsync(int projectId);
+
+        /// <summary>
+        /// Получить все проекты пользователя.
+        /// </summary>
+        /// <param name="userId">Идентификатор пользователя.</param>
+        /// <returns>Список проектов пользователя.</returns>
         Task<IEnumerable<Project>> GetUserProjectsAsync(int userId);
     }
-} 
+}

@@ -17,8 +17,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Extensions;
 
+/// <summary>
+/// Регистрирует обработчики команд уровня Application и маршрутизатор команд.
+/// </summary>
 public static class ServiceApplicationCollectionExtensions
 {
+    /// <summary>
+    /// Добавляет сервисы приложения в контейнер DI.
+    /// </summary>
     public static void AddApplicationServices(this IServiceCollection services)
     {
         

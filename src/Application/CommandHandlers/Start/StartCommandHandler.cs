@@ -7,6 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace Application.CommandHandlers.Start;
 
+/// <summary>
+/// Обрабатывает команду /start и ведёт простой поток регистрации, сохраняя состояние в Redis.
+/// </summary>
 public class StartCommandHandler : ICommandHandler<StartCommand>
 {
     private readonly IUserRepository _userRepository;
@@ -20,6 +23,9 @@ public class StartCommandHandler : ICommandHandler<StartCommand>
         _radisRepository = radisRepository;
     }
 
+    /// <summary>
+    /// Пошагово обрабатывает регистрацию по /start, опираясь на сохранённое состояние пользователя.
+    /// </summary>
     public async Task<string?> Handle(StartCommand? command)
     {
         _command = command;
@@ -104,6 +110,9 @@ public class StartCommandHandler : ICommandHandler<StartCommand>
         _radisRepository.StringSet("Reg: " + _command!.UserId, JsonSerializer.Serialize(user));
     }
 }
+/// <summary>
+/// Состояния потока регистрации для /start.
+/// </summary>
 public enum TrafficState
 {
     New,
@@ -114,6 +123,9 @@ public enum TrafficState
     Finished
 }
 
+/// <summary>
+/// Триггеры машины состояний потока регистрации (зарезервировано).
+/// </summary>
 public enum TrafficTrigger
 {
     Go

@@ -7,8 +7,14 @@ using Domain.Repositories;
 
 namespace Application.CommandHandlers.ProjectTask;
 
+/// <summary>
+/// Обрабатывает операции с задачами (CRUD-подобные) через одну команду /change_task.
+/// </summary>
 public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommandHandler<ChangeTaskCommand>
 {
+    /// <summary>
+    /// Делегирует выполнение конкретному действию на основе разобранных аргументов.
+    /// </summary>
     public async Task<string?> Handle(ChangeTaskCommand command)
     {
         var parsedCommand = ParseChangeTaskCommand(command.UserCommand);
@@ -31,6 +37,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         };
     }
 
+    /// <summary>Добавляет новую задачу в проект.</summary>
     private async Task<string> HandleAddTask(string[] parsedCommand)
     {
         var taskName = parsedCommand[1];
@@ -51,6 +58,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         return $"Задача '{taskName}' успешно добавлена.";
     }
 
+    /// <summary>Удаляет задачу по ID.</summary>
     private async Task<string> HandleDeleteTask(string[] parsedCommand)
     {
         if (!int.TryParse(parsedCommand[1], out var taskId))
@@ -62,6 +70,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         return $"Задача с ID {taskId} успешно удалена.";
     }
 
+    /// <summary>Назначает задачу пользователю.</summary>
     private async Task<string> HandleAssignTask(string[] parsedCommand)
     {
         if (!int.TryParse(parsedCommand[1], out var taskId) || !int.TryParse(parsedCommand[2], out var userId))
@@ -73,6 +82,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         return $"Пользователь с ID {userId} успешно назначен на задачу с ID {taskId}.";
     }
 
+    /// <summary>Выводит все задачи.</summary>
     private async Task<string> HandleListTasks()
     {
         var allTasks = await taskRepository.GetAllTasksAsync();
@@ -86,6 +96,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         return $"Все задачи:\n{taskList}";
     }
 
+    /// <summary>Показывает задачи, назначенные текущему пользователю.</summary>
     private async Task<string> HandleMyTasks(long? commandUserId)
     {
 
@@ -101,6 +112,7 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
         return $"Ваши задачи:\n{taskList}";
     }
 
+    /// <summary>Обновляет название и описание задачи.</summary>
     private async Task<string> HandleUpdateTask(string[] parsedCommand)
     {
         if (!int.TryParse(parsedCommand[0], out var taskId))
@@ -135,6 +147,9 @@ public class ChangeTaskCommandHandler(ITaskRepository taskRepository) : ICommand
                "- Мои задачи: /change_task [my]";
     }
 
+    /// <summary>
+    /// Извлекает токены из ввода команды /change_task в квадратных скобках.
+    /// </summary>
     private string[] ParseChangeTaskCommand(string userCommand)
     {
         var cleanedCommand = Regex.Replace(userCommand, @"^/change_task\s*", "", RegexOptions.IgnoreCase).Trim();

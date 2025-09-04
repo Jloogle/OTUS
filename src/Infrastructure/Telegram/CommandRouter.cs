@@ -9,6 +9,9 @@ using Domain.Constants;
 
 namespace Infrastructure.Telegram;
 
+/// <summary>
+/// Маршрутизирует входящие команды к соответствующим обработчикам, найденным при старте.
+/// </summary>
 public class CommandRouter : ICommandRouting
 {
     private readonly Dictionary<string, Func<ICommand, Task<string?>>> _routes = new();
@@ -18,8 +21,11 @@ public class CommandRouter : ICommandRouting
     {
         RegisterRoutes(handlers);
     }
-    
-    private void RegisterRoutes(IEnumerable<object> handlers) 
+
+    /// <summary>
+    /// Регистрирует маршруты для всех известных пар команда/обработчик.
+    /// </summary>
+    private void RegisterRoutes(IEnumerable<object> handlers)
     {
         foreach (var handler in handlers)
         {
@@ -39,7 +45,10 @@ public class CommandRouter : ICommandRouting
             RegisterRoute<BackCommand>(handler, BotCommands.Back);
         }
     }
-    
+
+    /// <summary>
+    /// Регистрирует маршрут для конкретного типа команды, если обработчик реализует интерфейс.
+    /// </summary>
     private void RegisterRoute<TCommand>(object handler, string trigger) where TCommand : ICommand
     {
         if (handler is ICommandHandler<TCommand> specificHandler)
@@ -49,7 +58,7 @@ public class CommandRouter : ICommandRouting
     }
 
     /// <summary>
-    /// Возвращает сообщение пользователю
+    /// Находит обработчик команды и возвращает сообщение пользователю (если обработана).
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>

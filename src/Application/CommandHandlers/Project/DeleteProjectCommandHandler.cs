@@ -4,6 +4,9 @@ using Domain.Repositories;
 
 namespace Application.CommandHandlers.Project;
 
+/// <summary>
+/// Удаляет проект по его идентификатору.
+/// </summary>
 public class DeleteProjectCommandHandler : ICommandHandler<DeleteProjectCommand>
 {
     private readonly IProjectRepository _projectRepository;
@@ -13,6 +16,9 @@ public class DeleteProjectCommandHandler : ICommandHandler<DeleteProjectCommand>
         _projectRepository = projectRepository;
     }
 
+    /// <summary>
+    /// Разбирает ID проекта и удаляет его через репозиторий.
+    /// </summary>
     public async Task<string?> Handle(DeleteProjectCommand command)
     {
         var projectIdMatch = System.Text.RegularExpressions.Regex.Match(command.UserCommand, @"\[(\d+)\]");
