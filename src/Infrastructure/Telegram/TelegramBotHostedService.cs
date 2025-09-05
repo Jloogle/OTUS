@@ -83,7 +83,8 @@ public class TelegramBotHostedService(
                    Keyboard =
                    [
                    [new KeyboardButton(BotCommands.AddProject), new KeyboardButton(BotCommands.ListMyProjects)],
-                   [new KeyboardButton(BotCommands.ProjectDelete), new KeyboardButton(BotCommands.ChangeTask)],
+                   [new KeyboardButton(BotCommands.TaskCreate), new KeyboardButton(BotCommands.TaskAssign)],
+                   [new KeyboardButton(BotCommands.ListMyTasks), new KeyboardButton(BotCommands.ProjectDelete)],
                    [new KeyboardButton(BotCommands.ListInvites), new KeyboardButton(BotCommands.InviteHistory)],
                    [new KeyboardButton(BotCommands.Back)]
                    ],
@@ -167,15 +168,29 @@ public class TelegramBotHostedService(
             {
                 UserId = update.Message.From?.Id
             },
-            BotCommands.ChangeTask => new ChangeTaskCommand()
-            {
-                UserId = update.Message.From?.Id,
-                UserCommand = update.Message.Text
-            },
+            // BotCommands.ChangeTask => new ChangeTaskCommand()
+            // {
+            //     UserId = update.Message.From?.Id,
+            //     UserCommand = update.Message.Text
+            // },
             BotCommands.TaskCreate => new TaskCreateCommand
             {
                 UserId = update.Message.From?.Id,
                 UserCommand = update.Message.Text
+            },
+            BotCommands.TaskAssign => new TaskAssignCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.TaskDeadline => new TaskSetDeadlineCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.ListMyTasks => new ListMyTasksCommand
+            {
+                UserId = update.Message.From?.Id
             },
             BotCommands.ProjectInvite => new InviteProjectMemberCommand
             {
@@ -198,6 +213,16 @@ public class TelegramBotHostedService(
                 UserCommand = update.Message.Text
             },
             BotCommands.InviteHistory => new InviteHistoryCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.AcceptTask => new AcceptTaskInviteCommand
+            {
+                UserId = update.Message.From?.Id,
+                UserCommand = update.Message.Text
+            },
+            BotCommands.DeclineTask => new DeclineTaskInviteCommand
             {
                 UserId = update.Message.From?.Id,
                 UserCommand = update.Message.Text

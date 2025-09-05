@@ -24,8 +24,11 @@ public class User
     public long? IdTelegram { get; set; }
 
     // Связи с другими сущностями
-    /// <summary>Проекты, в которых участвует пользователь.</summary>
+    /// <summary>Проекты, в которых участвует пользователь (устаревшая связь, оставлена для совместимости).</summary>
     public List<Project> Projects { get; set; } = new List<Project>();
+
+    /// <summary>Участие пользователя в проектах с ролями.</summary>
+    public List<ProjectMember> ProjectMemberships { get; set; } = new List<ProjectMember>();
 
     /// <summary>Задачи, назначенные пользователю для выполнения.</summary>
     public List<ProjTask> AssignedTasks { get; set; } = new List<ProjTask>();

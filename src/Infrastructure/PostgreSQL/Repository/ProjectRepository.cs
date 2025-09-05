@@ -1,4 +1,3 @@
-
 using Domain.Entities;
 using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -69,12 +68,29 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<IEnumerable<User>> GetProjectMembersAsync(int projectId)
     {
         var project = await _dbSet
-            .Include(p => p.Users)
+            .Include(p => p.Members)
+            .ThenInclude(pm => pm.User)
             .FirstOrDefaultAsync(p => p.Id == projectId);
 
-        return project?.Users ?? new List<User>();
+        return project?.Members.Select(m => m.User) ?? new List<User>();
     }
-    
+
+    public async Task UpdateProjectAsync(int projectId, string name, DateTime deadline)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Название проекта не может быть пустым", nameof(name));
+
+        var project = await _dbSet.FirstOrDefaultAsync(p => p.Id == projectId)
+                      ?? throw new ArgumentException($"Проект с ID {projectId} не найден", nameof(projectId));
+
+        project.Name = name;
+        project.Deadline = deadline.Kind == DateTimeKind.Utc
+            ? deadline
+            : DateTime.SpecifyKind(deadline, DateTimeKind.Utc);
+
+        await _context.SaveChangesAsync();
+    }
+
    
     
    
@@ -100,6 +116,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         
         var project = await _dbSet
             .Include(p => p.Users)
+            .Include(p => p.Members)
             .FirstOrDefaultAsync(p => p.Id == projectId);
     
         if (project == null)
@@ -118,6 +135,11 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         {
             Console.WriteLine($"Добавляем пользователя {user.Name} (ID: {user.Id}) в проект {project.Name} (ID: {project.Id})");
             project.Users.Add(user);
+            // Добавляем членство с ролью по умолчанию (исполнитель)
+            if (!project.Members.Any(m => m.UserId == userId))
+            {
+                project.Members.Add(new ProjectMember { ProjectId = projectId, UserId = userId, Role = ProjectRole.Executor });
+            }
             
             // Проверим состояние перед сохранением
             Console.WriteLine($"Количество пользователей в проекте перед сохранением: {project.Users.Count}");
@@ -132,6 +154,45 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         {
             Console.WriteLine($"Пользователь {userId} уже является участником проекта {projectId}");
         }
+    }
+
+    public async Task AddUserToProjectAsync(int projectId, int userId, ProjectRole role)
+    {
+        var project = await _dbSet
+            .Include(p => p.Users)
+            .Include(p => p.Members)
+            .FirstOrDefaultAsync(p => p.Id == projectId)
+            ?? throw new ArgumentException($"Проект с ID {projectId} не найден", nameof(projectId));
+
+        var user = await _context.Users.FindAsync(userId)
+                   ?? throw new ArgumentException($"Пользователь с ID {userId} не найден", nameof(userId));
+
+        if (project.Users.All(u => u.Id != userId))
+        {
+            project.Users.Add(user);
+        }
+        var member = project.Members.FirstOrDefault(m => m.UserId == userId);
+        if (member is null)
+        {
+            project.Members.Add(new ProjectMember { ProjectId = projectId, UserId = userId, Role = role });
+        }
+        else
+        {
+            member.Role = role;
+        }
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SetUserRoleInProjectAsync(int projectId, int userId, ProjectRole role)
+    {
+        var member = await _context.Set<ProjectMember>().FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+        if (member is null)
+        {
+            await AddUserToProjectAsync(projectId, userId, role);
+            return;
+        }
+        member.Role = role;
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>

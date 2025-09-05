@@ -29,6 +29,7 @@ namespace Infrastructure.Extensions
             services.AddTransient<IAdapterMultiplexer, AdapterMultiplexer>();
             services.AddTransient<IRadisRepository, RadisRepositoty>();
             services.AddSingleton<IInviteStore, InviteStore>();
+            services.AddSingleton<ITaskInviteStore, TaskInviteStore>();
             services.AddTransient<IRoleRepository, RoleRepository>();
 
 

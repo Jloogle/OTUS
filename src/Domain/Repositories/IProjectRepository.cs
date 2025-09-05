@@ -36,6 +36,7 @@ namespace Domain.Repositories
         /// <param name="projectId">Идентификатор проекта.</param>
         /// <param name="userId">Идентификатор пользователя.</param>
         Task AddUserToProjectAsync(int projectId, int userId);
+        Task AddUserToProjectAsync(int projectId, int userId, ProjectRole role);
 
         /// <summary>
         /// Удалить пользователя из проекта.
@@ -43,6 +44,11 @@ namespace Domain.Repositories
         /// <param name="projectId">Идентификатор проекта.</param>
         /// <param name="userId">Идентификатор пользователя.</param>
         Task RemoveUserFromProjectAsync(int projectId, int userId);
+
+        /// <summary>
+        /// Установить роль участника в рамках проекта.
+        /// </summary>
+        Task SetUserRoleInProjectAsync(int projectId, int userId, ProjectRole role);
 
         /// <summary>
         /// Асинхронно добавляет новый проект в базу данных.
@@ -67,5 +73,13 @@ namespace Domain.Repositories
         /// <param name="userId">Идентификатор пользователя.</param>
         /// <returns>Список проектов пользователя.</returns>
         Task<IEnumerable<Project>> GetUserProjectsAsync(int userId);
+
+        /// <summary>
+        /// Обновить проект: имя и дедлайн.
+        /// </summary>
+        /// <param name="projectId">Идентификатор проекта.</param>
+        /// <param name="name">Новое имя проекта.</param>
+        /// <param name="deadline">Новый дедлайн (UTC или будет нормализован).</param>
+        Task UpdateProjectAsync(int projectId, string name, DateTime deadline);
     }
 }

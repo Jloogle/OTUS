@@ -4,6 +4,7 @@ using Domain.Commands;
 using Domain.Commands.Project;
 using Domain.Repositories;
 using Domain.Services;
+using Domain.Entities;
 
 namespace Application.CommandHandlers.Project;
 
@@ -37,11 +38,14 @@ public class AcceptInviteCommandHandler(
 
         if (!string.IsNullOrWhiteSpace(invite.RoleName))
         {
-            var role = await roleRepository.GetByNameAsync(invite.RoleName);
-            if (role != null)
+            var roleName = invite.RoleName.Trim();
+            ProjectRole role = roleName.ToLower() switch
             {
-                await userRepository.AddRoleToUserAsync(acceptor.Id, role.Id);
-            }
+                "admin" => ProjectRole.Admin,
+                "manager" => ProjectRole.Manager,
+                _ => ProjectRole.Executor
+            };
+            await projectRepository.SetUserRoleInProjectAsync(invite.ProjectId, acceptor.Id, role);
         }
 
         await inviteStore.RemoveAsync(invite.Id);

@@ -40,5 +40,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMany(x => x.Roles)
             .WithMany(x => x.Users)
             .UsingEntity(j => j.ToTable("RoleUser"));
+
+        // Новая связь через ProjectMember
+        builder
+            .HasMany(x => x.ProjectMemberships)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
     }
 } 

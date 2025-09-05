@@ -71,5 +71,10 @@ namespace Domain.Repositories
         /// <param name="userId">Telegram ID пользователя.</param>
         /// <returns>Список задач пользователя.</returns>
         Task<IEnumerable<ProjTask>> GetTasksByUserIdAsync(long? userId);
+
+        /// <summary>
+        /// Получить задачу с подгруженным проектом по ID.
+        /// </summary>
+        Task<ProjTask?> GetTaskWithProjectAsync(int taskId);
     }
 }

@@ -19,10 +19,16 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
         builder.Property(x => x.Deadline)
             .IsRequired();
 
-        // Связь с пользователями настроена в UserConfiguration
-        
+        // Связь с пользователями настроена в UserConfiguration (устаревшая маппинг)
+
         builder
             .HasMany(x => x.ProjTasks)
             .WithOne(x => x.Project);
+
+        // Новая связь через ProjectMember с ролями
+        builder
+            .HasMany(x => x.Members)
+            .WithOne(x => x.Project)
+            .HasForeignKey(x => x.ProjectId);
     }
 } 

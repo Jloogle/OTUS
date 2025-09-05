@@ -62,6 +62,7 @@ public sealed class ApplicationContext  : DbContext
         modelBuilder.ApplyConfiguration(new ProjectConfiguration());
         modelBuilder.ApplyConfiguration(new ProjTaskConfiguration());
         modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjectMemberConfiguration());
         
         // Настройка связи многие-ко-многим между User и ProjTask
         modelBuilder.Entity<User>()

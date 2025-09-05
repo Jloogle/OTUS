@@ -130,65 +130,30 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
 
     public async Task AssignTaskToUserAsync(int taskId, int userId)
     {
-        using (ApplicationContext db = new ApplicationContext())
-        {
-            var user = await db.Users.FindAsync(userId); // проверяем, что пользователь существует
-            if (user == null)
-                throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
-            var task = await db.Tasks.FindAsync(taskId);
-            if (task == null)
-                throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
-            
-            if (task.AssignedUsers.Contains(user))
-                throw new InvalidOperationException($"Задача с ID {taskId} уже назначена пользователю с ID {userId}");
+        // Загружаем задачу вместе с проектом и назначенными пользователями
+        var task = await _dbSet
+            .Include(t => t.Project)
+            .Include(t => t.AssignedUsers)
+            .FirstOrDefaultAsync(t => t.Id == taskId)
+            ?? throw new InvalidOperationException($"Задача с ID {taskId} не найдена");
 
-            task.AssignedUsers.Add(user);   
-            await db.SaveChangesAsync();
-            db.SaveChanges();
-        }
+        var user = await _context.Users
+            .Include(u => u.Projects)
+            .Include(u => u.ProjectMemberships)
+            .FirstOrDefaultAsync(u => u.Id == userId)
+            ?? throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
 
-        /*var task = await _dbSet.FindAsync(taskId);
+        // Разрешаем назначение только участникам проекта задачи
+        var isMember = (task.Project != null && user.Projects.Any(p => p.Id == task.Project.Id))
+                       || (task.Project != null && _context.Set<ProjectMember>().Any(pm => pm.ProjectId == task.Project.Id && pm.UserId == userId));
+        if (!isMember)
+            throw new InvalidOperationException("Пользователь не является участником проекта задачи.");
 
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null && userId != 0) // userId = 0 означает "снять назначение"
-            throw new InvalidOperationException($"Пользователь с ID {userId} не найден");
+        if (task.AssignedUsers.Any(u => u.Id == userId))
+            throw new InvalidOperationException($"Задача уже назначена пользователю с ID {userId}");
 
-
-        using var transaction = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            string message;
-            if (userId == 0)
-            {
-                // Снимаем все назначения с задачи
-                task.AssignedUsers.Clear();
-                message = $"Задача '{task.Name}' снята с назначения";
-            }
-            else
-            {
-                // Проверяем, не назначена ли уже задача этому пользователю
-                if (!task.AssignedUsers.Any(u => u.Id == userId))
-                {
-                    task.AssignedUsers.Add(user);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    message = $"Задача '{task.Name}' назначена пользователю {user.Name}";
-                }
-                else
-                {
-                    message = $"Задача '{task.Name}' уже назначена пользователю {user.Name}";
-                }
-            }
-
-
-
-
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }*/
+        task.AssignedUsers.Add(user);
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteTaskAsync(int taskId)
@@ -275,5 +240,12 @@ public class TaskRepository : BaseRepository<ProjTask>, ITaskRepository
             .Include(t => t.AssignedUsers)
             .Where(t => t.AssignedUsers.Any(u => u.IdTelegram == idTelegram))
             .ToListAsync();
+    }
+
+    public async Task<ProjTask?> GetTaskWithProjectAsync(int taskId)
+    {
+        return await _dbSet
+            .Include(t => t.Project)
+            .FirstOrDefaultAsync(t => t.Id == taskId);
     }
 }

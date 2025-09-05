@@ -54,6 +54,8 @@ public static class ServiceInfrastructureCollectionExtensions
         services.AddSingleton<IDeadlinePolicy>(sp => new SoonDeadlinePolicy(TimeSpan.FromDays(1), "24 часа"));
         services.AddSingleton<IDeadlinePolicy>(sp => new SoonDeadlinePolicy(TimeSpan.FromHours(1), "1 час"));
         services.AddSingleton<IDeadlinePolicy>(sp => new SoonDeadlinePolicy(TimeSpan.FromMinutes(10), "10 минут"));
+        services.AddSingleton<IDeadlinePolicy>(sp => new OverdueDeadlinePolicy(TimeSpan.FromMinutes(10), "Просрочено 10 минут"));
+        services.AddSingleton<IDeadlinePolicy>(sp => new OverdueDeadlinePolicy(TimeSpan.FromHours(1), "Просрочено 1 час"));
         services.AddSingleton<TelegramNotifier>();
         services.AddSingleton<INotifier>(sp =>
             new RedisThrottleNotifierDecorator(
@@ -64,5 +66,8 @@ public static class ServiceInfrastructureCollectionExtensions
         services.AddTransient<DeadlineNotifierJob>();
         // Register recurring jobs registrar
         services.AddHostedService<RecurringJobsRegistrar>();
+
+        // Seed base roles
+        services.AddHostedService<RoleSeederHostedService>();
     }
 }

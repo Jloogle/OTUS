@@ -5,6 +5,7 @@ using System.Text.Json;
 using Domain.Services;
 using Telegram.Bot;
 using System.Text.RegularExpressions;
+using Domain.Entities;
 
 namespace Application.CommandHandlers.Project;
 
@@ -16,7 +17,8 @@ public class AddProjectCommandHandler(
     IRadisRepository redis,
     IUserRepository userRepository,
     IInviteStore inviteStore,
-    ITelegramBotClient bot
+    ITelegramBotClient bot,
+    IRoleRepository roleRepository
 ) : ICommandHandler<AddProjectCommand>
 {
     /// <summary>
@@ -77,7 +79,7 @@ public class AddProjectCommandHandler(
                     {
                         try
                         {
-                            await projectRepository.AddUserToProjectAsync(projectId, creator.Id);
+                            await projectRepository.AddUserToProjectAsync(projectId, creator.Id, ProjectRole.Admin);
                         }
                         catch (Exception ex)
                         {

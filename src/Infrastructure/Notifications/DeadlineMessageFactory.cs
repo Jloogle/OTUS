@@ -20,11 +20,19 @@ public class DeadlineMessageFactory : IDeadlineMessageFactory
         var now = DateTime.UtcNow;
         var deadline = task.Deadline!.Value.ToUniversalTime();
         var remaining = deadline - now;
-        var remainingHuman = remaining.TotalHours >= 1
-            ? $"{Math.Floor(remaining.TotalHours)} ч. {remaining.Minutes} мин."
-            : $"{remaining.Minutes} мин.";
+        var abs = remaining.Duration();
+        var remainingHuman = abs.TotalHours >= 1
+            ? $"{Math.Floor(abs.TotalHours)} ч. {abs.Minutes} мин."
+            : $"{abs.Minutes} мин.";
 
         var projectName = task.Project?.Name ?? "проект";
-        return $"Напоминание: задача '{task.Name}' в '{projectName}' истекает через {remainingHuman} (политика: {policy.Name}).";
+        if (remaining >= TimeSpan.Zero)
+        {
+            return $"Напоминание: задача '{task.Name}' в '{projectName}' истекает через {remainingHuman} (политика: {policy.Name}).";
+        }
+        else
+        {
+            return $"Внимание: задача '{task.Name}' в '{projectName}' просрочена на {remainingHuman} (политика: {policy.Name}).";
+        }
     }
 }

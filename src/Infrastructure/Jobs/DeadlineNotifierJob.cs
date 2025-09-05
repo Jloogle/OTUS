@@ -1,6 +1,8 @@
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.Services.Notifications;
+using Infrastructure.PostgreSQL;
+using StackExchange.Redis;
 
 namespace Infrastructure.Jobs;
 
@@ -13,8 +15,10 @@ public class DeadlineNotifierJob(
     IProjectRepository projectRepository,
     IDeadlineMessageFactory messageFactory,
     IEnumerable<IDeadlinePolicy> policies,
-    INotifier notifier)
+    INotifier notifier,
+    IAdapterMultiplexer multiplexer)
 {
+    private readonly IDatabase _db = multiplexer.getMultiplexer().GetDatabase();
     /// <summary>
     /// Выполняет один проход проверки дедлайнов и отправку уведомлений.
     /// </summary>
@@ -34,6 +38,14 @@ public class DeadlineNotifierJob(
             foreach (var policy in policies)
             {
                 if (!policy.ShouldNotify(now, deadlineUtc)) continue;
+
+                // Дедупликация: разово для каждой политики и задачи в пределах окна политики
+                var dedupeKey = $"DeadlineNotify:{policy.Name}:{task.Id}";
+                var exists = await _db.StringGetAsync(dedupeKey);
+                if (!exists.IsNullOrEmpty)
+                {
+                    continue; // уже уведомляли по этой политике для этой задачи
+                }
 
                 var message = messageFactory.Create(task, policy);
 
@@ -60,6 +72,9 @@ public class DeadlineNotifierJob(
                         // Ignore individual failures, continue processing
                     }
                 }
+
+                // Отметим отправку по политике, чтобы не спамить: TTL = окно политики
+                await _db.StringSetAsync(dedupeKey, "1", expiry: policy.Window);
             }
         }
     }
